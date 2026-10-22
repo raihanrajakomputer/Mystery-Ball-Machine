@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@400;500;700&display=swap');
+
+:root{--orange:#f36b21;--orange-dark:#c94c0e;--yellow:#ffd33d;--cream:#fff4dc;--paper:#fffaf0;--brown:#2a1b12;--muted:#806d5f;--line:#2a1b12}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at 15% 10%,rgba(255,211,61,.25),transparent 25%),radial-gradient(circle at 85% 80%,rgba(243,107,33,.12),transparent 30%),var(--cream);color:var(--brown);font-family:"DM Sans",Arial,sans-serif}
+button,input{font:inherit}.page{min-height:100vh;display:none}.page.active{display:block}
+#login-page{display:none;place-items:center;padding:24px}#login-page.active{display:grid}
+.login-card{width:min(460px,100%);padding:48px 42px;background:var(--paper);border:4px solid var(--line);border-radius:28px;box-shadow:12px 12px 0 var(--orange);text-align:center}
+.eyebrow{margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:.16em}
+.login-card h1,.intro h2,.collection h2{font-family:"Archivo Black",Impact,sans-serif;line-height:.9;margin:0}
+.login-card h1{font-size:clamp(48px,12vw,78px)}.login-card h1 span,.brand span{color:var(--orange)}
+.tagline{color:var(--muted);margin:18px 0 28px}
+#name-input{width:100%;border:3px solid var(--line);border-radius:14px;padding:15px 16px;outline:none;background:white}
+#name-input:focus{box-shadow:4px 4px 0 var(--yellow)}
+.primary-btn,.spin-btn{width:100%;margin-top:12px;border:3px solid var(--line);border-radius:14px;padding:15px;background:var(--orange);color:white;font-weight:700;cursor:pointer;box-shadow:5px 5px 0 var(--line);transition:.15s ease}
+.primary-btn:hover,.spin-btn:hover{transform:translate(-2px,-2px)}.primary-btn:active,.spin-btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--line)}
+.tiny{font-size:12px;color:var(--muted);margin:20px 0 0}
+.topbar{max-width:1180px;margin:auto;padding:26px 24px;display:flex;justify-content:space-between;align-items:center}
+.brand{font-family:"Archivo Black",Impact,sans-serif;font-size:22px}.player{display:flex;gap:14px;align-items:center;font-size:13px;font-weight:700}
+.points-badge{padding:9px 13px;border:3px solid var(--line);border-radius:999px;background:var(--yellow)}
+.game-layout{max-width:1180px;margin:auto;padding:28px 24px 70px;display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:34px;align-items:center}
+.intro{align-self:start;padding-top:80px}.intro h2{font-size:clamp(42px,5vw,68px)}.hint{margin-top:24px;max-width:230px;color:var(--muted);line-height:1.5}
+.machine-wrap{display:flex;justify-content:center}.machine{width:min(330px,82vw);padding:18px 18px 0;background:var(--orange);border:4px solid var(--line);border-radius:28px 28px 18px 18px;box-shadow:12px 14px 0 var(--line);position:relative}
+.machine-sign{text-align:center;font-family:"Archivo Black",Impact,sans-serif;color:var(--yellow);font-size:30px;line-height:.85;padding:10px}.machine-sign small{font-size:19px;color:white}
+.machine-glass{height:280px;overflow:hidden;position:relative;border:4px solid var(--line);border-radius:20px;background:#ffe7b5}.shine{position:absolute;width:70px;height:340px;left:28px;top:-30px;background:rgba(255,255,255,.25);transform:rotate(18deg);z-index:2;pointer-events:none}
+.balls{position:absolute;inset:0}.ball{position:absolute;width:70px;height:70px;border:4px solid var(--line);border-radius:50%;box-shadow:inset -9px -9px 0 rgba(0,0,0,.1),4px 5px 0 rgba(42,27,18,.2)}
+.ball:after{content:"";position:absolute;width:15px;height:9px;background:rgba(255,255,255,.65);border-radius:50%;top:13px;left:15px;transform:rotate(-25deg)}
+.orange{background:var(--orange)}.yellow{background:var(--yellow)}
+.ball:nth-child(1){left:25px;top:36px}.ball:nth-child(2){right:30px;top:25px}.ball:nth-child(3){left:100px;top:80px}.ball:nth-child(4){right:92px;top:100px}.ball:nth-child(5){left:40px;top:170px}.ball:nth-child(6){right:22px;top:180px}.ball:nth-child(7){left:125px;top:190px}.ball.small{width:55px;height:55px}
+.machine-body{padding:16px 4px 20px;text-align:center}.machine-label{font-size:11px;font-weight:700;letter-spacing:.15em;color:white}
+.spin-btn{background:var(--yellow);color:var(--brown);font-family:"Archivo Black",Impact,sans-serif;font-size:21px;margin-top:9px}.spin-btn span{font-size:25px}
+.dispense{width:95px;height:40px;margin:20px auto -3px;border:4px solid var(--line);border-radius:10px;background:#22160f;color:var(--yellow);font-size:23px;display:grid;place-items:center}
+.machine-base{height:15px;background:var(--orange-dark);margin:0 -18px;border-radius:0 0 14px 14px}
+.result-card{align-self:start;margin-top:80px;padding:24px;border:3px solid var(--line);border-radius:20px;background:var(--paper);min-height:220px}
+.result-label{font-size:11px;font-weight:700;letter-spacing:.15em}.result-icon{width:54px;height:54px;display:grid;place-items:center;margin:16px 0 12px;border-radius:50%;background:var(--yellow);border:3px solid var(--line);font-family:"Archivo Black",Impact,sans-serif}
+.result-card h3{margin:0 0 8px;font-size:22px}.result-card p{margin:0;line-height:1.5;color:var(--muted)}
+.collection{grid-column:1/-1;border-top:3px solid var(--line);padding-top:28px}.section-heading{display:flex;justify-content:space-between;align-items:end;margin-bottom:18px}.collection h2{font-size:35px}#collection-count{font-weight:700;color:var(--muted)}
+.collection-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}.collection-item{min-height:110px;padding:14px;border:3px solid var(--line);border-radius:16px;background:var(--paper);display:flex;flex-direction:column;justify-content:space-between}
+.collection-ball{width:34px;height:34px;border:3px solid var(--line);border-radius:50%}.collection-item strong{font-size:13px}.collection-item span{font-size:11px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,130px);background:var(--brown);color:white;padding:12px 18px;border-radius:999px;font-size:13px;transition:.25s ease;z-index:10}.toast.show{transform:translate(-50%,0)}
+.machine.spinning .balls{animation:shake .55s ease-in-out}.machine.spinning .dispense{animation:pulse .55s ease-in-out}
+@keyframes shake{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-7px) rotate(-3deg)}50%{transform:translateX(7px) rotate(3deg)}75%{transform:translateX(-4px) rotate(-2deg)}}
+@keyframes pulse{50%{transform:scale(1.12);background:var(--yellow);color:var(--brown)}}
+@media(max-width:900px){.game-layout{grid-template-columns:1fr}.intro,.result-card{margin:0;padding-top:0}.intro{text-align:center}.hint{margin:16px auto 0}.machine-wrap{order:1}.intro{order:0}.result-card{order:2}.collection{order:3}.collection-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:520px){.topbar{padding:18px 16px}.player>span{display:none}.game-layout{padding:18px 16px 50px}.login-card{padding:38px 24px}.collection-grid{grid-template-columns:repeat(2,1fr)}}

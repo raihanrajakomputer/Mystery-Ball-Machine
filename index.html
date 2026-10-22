@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mystery Ball</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<section id="login-page" class="page active">
+  <div class="login-card">
+    <div class="eyebrow">★ MYSTERY MACHINE ★</div>
+    <h1>MYSTERY<br><span>BALL</span></h1>
+    <p class="tagline">Something is waiting inside.</p>
+    <input id="name-input" type="text" maxlength="18" placeholder="Enter your name">
+    <button id="login-btn" class="primary-btn">ENTER THE MACHINE</button>
+    <p class="tiny">New players receive 1000 points.</p>
+  </div>
+</section>
+
+<section id="game-page" class="page">
+  <header class="topbar">
+    <div class="brand">MYSTERY<span>BALL</span></div>
+    <div class="player">
+      <span id="player-name">PLAYER</span>
+      <div class="points-badge">● <strong id="points">1000</strong></div>
+    </div>
+  </header>
+
+  <main class="game-layout">
+    <div class="intro">
+      <p class="eyebrow">TODAY'S CHANCE</p>
+      <h2>What will<br>you get?</h2>
+      <div class="hint">Every spin costs <b>150</b> points.</div>
+    </div>
+
+    <div class="machine-wrap">
+      <div class="machine">
+        <div class="machine-sign">MYSTERY<br><small>BALL</small></div>
+        <div class="machine-glass">
+          <div class="shine"></div>
+          <div class="balls">
+            <div class="ball orange"></div><div class="ball yellow"></div>
+            <div class="ball orange small"></div><div class="ball yellow small"></div>
+            <div class="ball orange"></div><div class="ball yellow"></div>
+            <div class="ball orange small"></div>
+          </div>
+        </div>
+        <div class="machine-body">
+          <div class="machine-label">INSERT 150 PTS</div>
+          <button id="spin-btn" class="spin-btn">SPIN <span>↻</span></button>
+          <div class="dispense">?</div>
+        </div>
+        <div class="machine-base"></div>
+      </div>
+    </div>
+
+    <section class="result-card">
+      <span class="result-label">YOUR RESULT</span>
+      <div id="result-icon" class="result-icon">?</div>
+      <h3 id="result-title">Mystery awaits.</h3>
+      <p id="result-message">Press SPIN and see what the machine has for you.</p>
+    </section>
+
+    <section class="collection">
+      <div class="section-heading">
+        <div><p class="eyebrow">YOUR TROPHIES</p><h2>COLLECTION</h2></div>
+        <span id="collection-count">0 / 8</span>
+      </div>
+      <div id="collection-list" class="collection-grid"></div>
+    </section>
+  </main>
+</section>
+
+<div id="toast" class="toast"></div>
+<script src="script.js"></script>
+</body>
+</html>
