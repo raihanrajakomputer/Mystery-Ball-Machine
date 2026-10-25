@@ -9,7 +9,7 @@ Jalankan dengan membuka `index.html`.
 - Popup tambah poin via TikTok +500 (klaim manual, tidak bisa diverifikasi frontend statis)
 - Buku koleksi + preview koleksi (semua 10 slot, yang belum didapat tampil sebagai rahasia)
 - Animasi spin + confetti, responsive
-- Pilihan bahasa: 🇮🇩 Indonesia / 🏴 Makassar (disimpan di localStorage)
+- Pilihan bahasa: 🇮🇩 Indonesia /  Makassar (disimpan di localStorage)
 - **Ganti username** (tombol ✎ GANTI di pojok kanan atas)
 
 ## Admin
