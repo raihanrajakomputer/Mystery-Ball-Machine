@@ -13,7 +13,7 @@ Jalankan dengan membuka `index.html`.
   3. Tebak nama admin: benar +500 poin (sekali per akun), salah -10 poin (tidak bisa di bawah 0)
   4. Bonus TikTok +500 (klaim manual, sekali)
 - Buku koleksi + preview 10 slot, animasi spin + confetti, responsive
-- Bahasa: 🇮🇩 Indonesia / 🏴 Makassar
+- Bahasa: 🇮🇩 Indonesia /  Makassar
 - Ganti username (✎ GANTI)
 
 Angka bonus ada di bagian atas `script.js` (`DUP_BONUS`, `DAILY_BONUS`, `MATH_REWARD`, `MATH_DAILY_LIMIT`, `GUESS_REWARD`, `GUESS_PENALTY`, `GUESS_ANSWERS`).
