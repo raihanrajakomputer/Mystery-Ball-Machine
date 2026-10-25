@@ -23,7 +23,7 @@ Jalankan dengan membuka `index.html`.
   9. Pemburu Langka: punya bola Langka+ (+300)  10. Sang Penemu: punya bola Legendaris (+1000)
   - Hitungan putaran, bola kembar, matematika, dan harian dimulai dari saat fitur ini dipasang
 - Buku koleksi + preview 10 slot, animasi spin + confetti, responsive
-- Bahasa: 🇮🇩 Indonesia / 🏴 Makassar
+- Bahasa: 🇮🇩 Indonesia /  Makassar
 - Ganti username (✎ GANTI)
 
 Angka bonus ada di bagian atas `script.js` (`DUP_BONUS`, `DAILY_BONUS`, `MATH_REWARD`, `MATH_DAILY_LIMIT`, `GUESS_REWARD`, `GUESS_PENALTY`, `GUESS_ANSWERS`, `COUNT_REWARDS`, `TIER_REWARDS`, `ACHIEVEMENTS`).
