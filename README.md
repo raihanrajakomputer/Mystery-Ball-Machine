@@ -25,6 +25,3 @@ Jalankan dengan membuka `index.html`.
 - HTML memakai `data-i18n`, `data-i18n-html`, `data-i18n-placeholder`, `data-i18n-aria`.
 - Storage: `mysteryBallUsers` (record per user), `mysteryBallSession`, `mysteryBallLanguage`.
 - Semua tampilan lewat `renderAll()`, jadi ganti bahasa/username/spin selalu konsisten.
-
-Reset data: `localStorage.clear()` di console.
-Catatan: ini frontend/demo, bukan autentikasi aman untuk produksi.
