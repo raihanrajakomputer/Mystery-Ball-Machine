@@ -15,11 +15,6 @@ Fitur utama:
 - localStorage
 - Responsive
 
-Jalankan dengan membuka `index.html`.
-
-Reset data:
-`localStorage.removeItem("mysteryBallData")`
-
 Catatan: Follow TikTok tidak dapat diverifikasi otomatis oleh frontend statis; bonus menggunakan klaim manual.
 
 
@@ -30,9 +25,6 @@ Catatan: Follow TikTok tidak dapat diverifikasi otomatis oleh frontend statis; b
 - Bahasa yang dipilih disimpan di localStorage.
 - Teks halaman, popup poin, hasil spin, dan buku koleksi mengikuti bahasa yang dipilih.
 
-## Login Username + Admin
-- Username admin: `ryels` dan `admin`.
-- Admin memiliki poin tak terbatas (∞), spin tidak mengurangi poin dan tidak perlu bonus TikTok.
-- Username biasa mendapatkan 1000 poin saat pertama kali dibuat.
+## Login Username
 - Data per-user disimpan di localStorage.
 - Ini frontend/demo, bukan autentikasi aman produksi.
