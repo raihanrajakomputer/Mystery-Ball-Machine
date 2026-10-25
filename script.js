@@ -11,7 +11,13 @@ const USERNAME_RE = /^[a-z0-9][a-z0-9_. -]{1,17}$/; // wajib diawali huruf/angka
 const KEYS = { users: "mysteryBallUsers", session: "mysteryBallSession", lang: "mysteryBallLanguage", legacy: "mysteryBallData" };
 const LANGS = { id: { flag: "🇮🇩", label: "Indonesia" }, mak: { flag: "🏴", label: "Makassar" } };
 const TIERS = ["common", "uncommon", "rare", "epic", "legendary"];
-const GLOBAL_VARS = { cost: COST, points: START_POINTS, bonus: TIKTOK_REWARD };
+const DUP_BONUS = 50;                                   // bonus poin jika bola yang didapat sudah dimiliki
+const DAILY_BONUS = 200;                                // claim harian
+const MATH_REWARD = 100, MATH_DAILY_LIMIT = 5;          // teka-teki matematika: poin & batas percobaan/hari
+const GUESS_REWARD = 500, GUESS_PENALTY = 10;           // tebak nama admin (hadiah hanya sekali per akun)
+const GUESS_ANSWERS = ["rey", "rei", "rai", "raihan", "raihan al", "raihan al rajab"];
+const GLOBAL_VARS = { cost: COST, points: START_POINTS, bonus: TIKTOK_REWARD, dup: DUP_BONUS, daily: DAILY_BONUS,
+  mathReward: MATH_REWARD, mathMax: MATH_DAILY_LIMIT, guessReward: GUESS_REWARD, penalty: GUESS_PENALTY };
 
 /* =========================================================
    DATA: BALLS (tiap bola punya teks per bahasa)
@@ -75,7 +81,7 @@ const I18N = {
     "close": "Tutup",
     "intro.eyebrow": "CARI BOLA",
     "intro.title": "APA<br>YANG ADA?",
-    "intro.hint": "Satu putaran = {cost} poin.",
+    "intro.hint": "Satu putaran = {cost} poin. Dapat bola kembar = +{dup} poin.",
     "machine.label": "SATU PUTARAN • {cost} POIN",
     "spin": "PUTAR",
     "result.label": "HASIL KAMU",
@@ -90,7 +96,49 @@ const I18N = {
     "book.secret": "RAHASIA",
     "book.lockedFooter": "Bola ini belum didapat. Putar lagi.",
     "spin.newBall": "Bola baru masuk koleksi!",
-    "spin.duplicate": "Bola itu sudah pernah kamu dapat.",
+    "spin.duplicate": "Bola kembar! +{dup} poin.",
+    "spin.duplicateAdmin": "Bola itu sudah kamu miliki.",
+    "earn.open": "+ POIN",
+    "earn.eyebrow": "TAMBAH POIN",
+    "earn.title": "Pilih caranya",
+    "earn.back": "← KEMBALI",
+    "earn.opt.daily.name": "Claim harian",
+    "earn.opt.daily.desc": "Ambil +{daily} poin, sekali sehari.",
+    "earn.opt.math.name": "Teka-teki matematika",
+    "earn.opt.math.desc": "Jawab benar +{mathReward} poin. Maks {mathMax}x per hari.",
+    "earn.opt.guess.name": "Tebak nama admin",
+    "earn.opt.guess.desc": "Benar +{guessReward} poin, salah -{penalty} poin.",
+    "earn.opt.tiktok.name": "Bonus TikTok",
+    "earn.opt.tiktok.desc": "Follow akun TikTok untuk +{bonus} poin (sekali).",
+    "earn.status.dailyReady": "Siap diklaim",
+    "earn.status.dailyDone": "Sudah diklaim hari ini",
+    "earn.status.math": "Sisa {n} dari {max} kesempatan hari ini",
+    "earn.status.guessOpen": "Belum terjawab",
+    "earn.status.guessDone": "Sudah terjawab",
+    "earn.status.tiktokOpen": "Tersedia",
+    "earn.status.tiktokDone": "Sudah diambil",
+    "earn.daily.info": "Datang setiap hari dan ambil bonus gratismu.",
+    "earn.daily.claim": "CLAIM +{daily} POIN",
+    "earn.daily.done": "SUDAH DIKLAIM HARI INI",
+    "earn.daily.success": "Claim harian berhasil! +{daily} poin.",
+    "earn.daily.already": "Hari ini sudah diklaim. Kembali besok!",
+    "earn.math.prompt": "Hitung dengan teliti:",
+    "earn.math.placeholder": "Jawabanmu (angka bulat)",
+    "earn.math.submit": "JAWAB",
+    "earn.math.left": "Sisa kesempatan hari ini: {n}/{max}",
+    "earn.math.right": "Benar! +{n} poin.",
+    "earn.math.wrong": "Salah. Jawaban yang benar: {answer}.",
+    "earn.math.invalid": "Isi dengan angka bulat.",
+    "earn.math.limit": "Kesempatan hari ini habis. Coba lagi besok!",
+    "earn.guess.question": "Siapakah orang terkeren dan tersigma sepanjang sejarah?",
+    "earn.guess.hint": "Benar: +{guessReward} poin (sekali saja). Salah: -{penalty} poin.",
+    "earn.guess.placeholder": "Ketik jawabanmu...",
+    "earn.guess.submit": "TEBAK",
+    "earn.guess.right": "Benar! +{n} poin.",
+    "earn.guess.wrong": "Salah! -{n} poin.",
+    "earn.guess.wrongZero": "Salah! Poinmu sudah 0, jadi tidak ada yang dikurangi.",
+    "earn.guess.empty": "Tulis jawabanmu dulu.",
+    "earn.guess.already": "Pertanyaan ini sudah kamu jawab dengan benar.",
     "reward.eyebrow": "POIN HABIS",
     "reward.title": "Mau tambah poin?",
     "reward.text": "Buka TikTok-ku, follow akun <b>@ryoiko_</b>, lalu kembali ke sini untuk klaim bonus poin.",
@@ -138,7 +186,7 @@ const I18N = {
     "close": "Tutup",
     "intro.eyebrow": "CINI'KI APA NA EROI",
     "intro.title": "APA<br>NA NIALLA?",
-    "intro.hint": "Se're putaran = {cost} poin.",
+    "intro.hint": "Se're putaran = {cost} poin. Ball sikamma = +{dup} poin.",
     "machine.label": "SE'RE PUTARAN • {cost} POIN",
     "spin": "PUTAR",
     "result.label": "HASILTA",
@@ -153,7 +201,49 @@ const I18N = {
     "book.secret": "RAHASIA",
     "book.lockedFooter": "Ballna belum nialle. Putar pole.",
     "spin.newBall": "Ball baru masuk koleksita!",
-    "spin.duplicate": "Ballna sudah pernah nialle.",
+    "spin.duplicate": "Ball sikamma! +{dup} poin.",
+    "spin.duplicateAdmin": "Ballna sudah nipunnai.",
+    "earn.open": "+ POIN",
+    "earn.eyebrow": "TAMBAH POIN",
+    "earn.title": "Pile' caranna",
+    "earn.back": "← BALI'",
+    "earn.opt.daily.name": "Claim se're allo",
+    "earn.opt.daily.desc": "Alle +{daily} poin, se're ri se're allo.",
+    "earn.opt.math.name": "Teka-teki matematika",
+    "earn.opt.math.desc": "Jawab benarki +{mathReward} poin. Maks {mathMax}x ri se're allo.",
+    "earn.opt.guess.name": "Tebak areng admin",
+    "earn.opt.guess.desc": "Benar +{guessReward} poin, salah -{penalty} poin.",
+    "earn.opt.tiktok.name": "Bonus TikTok",
+    "earn.opt.tiktok.desc": "Follow akun TikTok untuk +{bonus} poin (se're).",
+    "earn.status.dailyReady": "Siap nialle",
+    "earn.status.dailyDone": "Le'ba' nialle ri allo anne",
+    "earn.status.math": "Tersisa {n} ri {max} kesempatan ri allo anne",
+    "earn.status.guessOpen": "Belum nijawab",
+    "earn.status.guessDone": "Le'ba' nijawab",
+    "earn.status.tiktokOpen": "Niak",
+    "earn.status.tiktokDone": "Le'ba' nialle",
+    "earn.daily.info": "Lampa mae ri tiap allo, alle bonus gratista.",
+    "earn.daily.claim": "CLAIM +{daily} POIN",
+    "earn.daily.done": "LE'BA' NICLAIM RI ALLO ANNE",
+    "earn.daily.success": "Tarima! Claim se're allo +{daily} poin.",
+    "earn.daily.already": "Le'ba' niclaim ri allo anne. Bali' pa'risiki!",
+    "earn.math.prompt": "Itung na bagus-bagus:",
+    "earn.math.placeholder": "Jawabanta (angka bulat)",
+    "earn.math.submit": "JAWAB",
+    "earn.math.left": "Kesempatan tersisa: {n}/{max}",
+    "earn.math.right": "Benar! +{n} poin.",
+    "earn.math.wrong": "Salah. Jawaban benarna: {answer}.",
+    "earn.math.invalid": "Isi angka bulat.",
+    "earn.math.limit": "Kesempatan ri allo anne lakbusukmi. Coba pole pa'risiki!",
+    "earn.guess.question": "Siapakah orang terkeren dan tersigma sepanjang sejarah?",
+    "earn.guess.hint": "Benar: +{guessReward} poin (se're). Salah: -{penalty} poin.",
+    "earn.guess.placeholder": "Tulis jawabanta...",
+    "earn.guess.submit": "TEBAK",
+    "earn.guess.right": "Benar! +{n} poin.",
+    "earn.guess.wrong": "Salah! -{n} poin.",
+    "earn.guess.wrongZero": "Salah! Poinnu 0 mi, jadi tena nikurang.",
+    "earn.guess.empty": "Tulis jawabanta dulu.",
+    "earn.guess.already": "Le'ba' nijawab benar pertanyaan anne.",
     "reward.eyebrow": "POINNU LAKBUSUKMI",
     "reward.title": "Erok tambah poin?",
     "reward.text": "Lampa ri TikTok-ku, follow akun <b>@ryoiko_</b>, terus bali' mae ri sini untuk alle bonus poin.",
@@ -215,6 +305,7 @@ const bookBtn = $("book-btn"), bookOverlay = $("book-overlay"), closeBook = $("c
 const bookCount = $("book-count"), bookProgress = $("book-progress"), rarityGuide = $("rarity-guide");
 const rewardOverlay = $("reward-overlay"), closeReward = $("close-reward"), tiktokBtn = $("tiktok-btn"), claimBtn = $("claim-btn");
 const renameBtn = $("rename-btn"), renameOverlay = $("rename-overlay"), closeRename = $("close-rename");
+const earnBtn = $("earn-btn"), earnOverlay = $("earn-overlay"), closeEarn = $("close-earn");
 const renameInput = $("rename-input"), renameSubmit = $("rename-submit"), renameError = $("rename-error");
 
 /* =========================================================
@@ -241,7 +332,11 @@ function sanitize(username, r) {
     username,
     points: Number.isFinite(r.points) ? r.points : START_POINTS,
     collection: [...new Set(Array.isArray(r.collection) ? r.collection : [])].filter(id => ID_SET.has(id)),
-    tiktokRewardClaimed: !!r.tiktokRewardClaimed
+    tiktokRewardClaimed: !!r.tiktokRewardClaimed,
+    lastDaily: typeof r.lastDaily === "string" ? r.lastDaily : null,
+    mathDay: typeof r.mathDay === "string" ? r.mathDay : null,
+    mathCount: Number.isInteger(r.mathCount) && r.mathCount > 0 ? r.mathCount : 0,
+    guessSolved: !!r.guessSolved
   };
 }
 function getRecord() {
@@ -250,7 +345,7 @@ function getRecord() {
 }
 function saveRecord(rec) {
   const users = getUsers();
-  users[rec.username] = { username: rec.username, points: rec.points, collection: rec.collection, tiktokRewardClaimed: rec.tiktokRewardClaimed };
+  users[rec.username] = { ...rec };
   saveUsers(users);
 }
 /* Tampilan efektif: admin => poin ∞ + semua koleksi (data asli tidak ditimpa) */
@@ -346,6 +441,7 @@ function renderAll() {
   renderCollection(v);
   renderBook(v);
   renderReward();
+  renderEarn();
 }
 
 /* =========================================================
@@ -373,7 +469,7 @@ function openModal(overlay) { overlay.classList.add("show"); overlay.setAttribut
 function closeModal(overlay) { overlay.classList.remove("show"); overlay.setAttribute("aria-hidden", "true"); if (!document.querySelector(".modal-overlay.show")) document.body.classList.remove("modal-open"); }
 function openBook() { const r = getRecord(); if (r) renderBook(view(r)); bookOverlay.classList.add("show"); bookOverlay.setAttribute("aria-hidden", "false"); document.body.classList.add("drawer-open"); }
 function closeBookDrawer() { bookOverlay.classList.remove("show"); bookOverlay.setAttribute("aria-hidden", "true"); document.body.classList.remove("drawer-open"); }
-function closeAllOverlays() { closeModal(rewardOverlay); closeModal(renameOverlay); closeBookDrawer(); }
+function closeAllOverlays() { closeModal(earnOverlay); closeModal(rewardOverlay); closeModal(renameOverlay); closeBookDrawer(); }
 
 /* =========================================================
    GAME LOGIC
@@ -410,18 +506,19 @@ function spin() {
   const rec = getRecord();
   if (!rec) return;
   const v = view(rec);
-  if (!v.admin && rec.points < COST) { openReward(); return; }
+  if (!v.admin && rec.points < COST) { openEarn(); return; }
 
   // Hasil ditentukan & DISIMPAN sekarang (atomik), animasi hanyalah tampilan.
   const ball = pickBall();
   const isNewBall = !v.collection.includes(ball.id);
-  if (!v.admin) rec.points -= COST;
+  const dupBonus = !v.admin && !isNewBall ? DUP_BONUS : 0;
+  if (!v.admin) rec.points = rec.points - COST + dupBonus;
   if (!rec.collection.includes(ball.id)) rec.collection.push(ball.id);
   saveRecord(rec);
 
   spinning = true;
   spinBtn.disabled = true;
-  pointsEl.textContent = v.admin ? "∞" : String(rec.points);
+  pointsEl.textContent = v.admin ? "∞" : String(rec.points - dupBonus);   // bonus bola kembar muncul saat hasil terbuka
   machine.classList.remove("win");
   machine.classList.add("spinning");
   dispense.textContent = "●";
@@ -433,7 +530,8 @@ function spin() {
     lastBallId = ball.id;
     const now = getRecord();
     if (now) { const nv = view(now); renderResult(); renderCollection(nv); renderBook(nv); }
-    toastMsg(t(isNewBall ? "spin.newBall" : "spin.duplicate"));
+    if (now) renderHeader(view(now));
+    toastMsg(t(isNewBall ? "spin.newBall" : (v.admin ? "spin.duplicateAdmin" : "spin.duplicate")));
     if (isNewBall) confetti();
     spinning = false;
     spinBtn.disabled = false;
@@ -510,6 +608,128 @@ function submitRename() {
 }
 
 /* =========================================================
+   TAMBAH POIN (menu: claim harian, teka-teki matematika, tebak nama admin, TikTok)
+   Batas anti-farming (semua per akun, disimpan di record):
+   - Harian : sekali per tanggal lokal (lastDaily)
+   - Matematika: maks MATH_DAILY_LIMIT percobaan per hari (benar/salah sama-sama dihitung)
+   - Tebak   : hadiah hanya sekali (guessSolved); salah = -GUESS_PENALTY (tidak bisa < 0)
+   ========================================================= */
+const EARN_VIEWS = ["menu", "daily", "math", "guess"];
+const feedback = { math: null, guess: null };
+let mathQ = null;
+
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+const mathUsed = rec => (rec.mathDay === todayKey() ? rec.mathCount : 0);
+
+/* Soal tingkat menengah: 2 langkah hitung, hasil selalu bilangan bulat positif */
+function makeMathQuestion() {
+  const r = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+  switch (r(0, 3)) {
+    case 0: { const a = r(12, 29), b = r(3, 9), c = r(10, 60); return { text: `${a} × ${b} + ${c}`, answer: a * b + c }; }
+    case 1: { const a = r(15, 40), b = r(3, 9), c = r(5, 40); return { text: `${a} × ${b} − ${c}`, answer: a * b - c }; }
+    case 2: { const a = r(11, 35), b = r(11, 35), c = r(3, 9); return { text: `(${a} + ${b}) × ${c}`, answer: (a + b) * c }; }
+    default: { const q = r(12, 40), d = r(3, 9), c = r(5, 30); return { text: `${q * d} ÷ ${d} + ${c} × 2`, answer: q + c * 2 }; }
+  }
+}
+
+function setFeedback(kind, key, vars, ok) { feedback[kind] = { key, vars, ok }; renderFeedback(kind); }
+function renderFeedback(kind) {
+  const el = $("earn-" + kind + "-feedback"), f = feedback[kind];
+  if (!f) { el.hidden = true; return; }
+  el.hidden = false;
+  el.textContent = t(f.key, f.vars);
+  el.className = "earn-feedback " + (f.ok ? "ok" : "bad");
+}
+function showEarnView(name) {
+  EARN_VIEWS.forEach(v => { $("earn-" + v).hidden = v !== name; });
+  if (name === "math" && !mathQ) mathQ = makeMathQuestion();
+  renderEarn();
+}
+function renderEarn() {
+  const rec = getRecord();
+  if (!rec) return;
+  const today = todayKey(), left = Math.max(0, MATH_DAILY_LIMIT - mathUsed(rec));
+  const dailyDone = rec.lastDaily === today;
+
+  $("earn-opt-daily").disabled = dailyDone;
+  $("earn-status-daily").textContent = t(dailyDone ? "earn.status.dailyDone" : "earn.status.dailyReady");
+  $("earn-opt-math").disabled = left === 0;
+  $("earn-status-math").textContent = t("earn.status.math", { n: left, max: MATH_DAILY_LIMIT });
+  $("earn-opt-guess").disabled = rec.guessSolved;
+  $("earn-status-guess").textContent = t(rec.guessSolved ? "earn.status.guessDone" : "earn.status.guessOpen");
+  $("earn-opt-tiktok").disabled = rec.tiktokRewardClaimed;
+  $("earn-status-tiktok").textContent = t(rec.tiktokRewardClaimed ? "earn.status.tiktokDone" : "earn.status.tiktokOpen");
+
+  $("earn-daily-claim").disabled = dailyDone;
+  $("earn-daily-claim").textContent = t(dailyDone ? "earn.daily.done" : "earn.daily.claim");
+
+  $("earn-math-question").textContent = mathQ ? mathQ.text + " = ?" : "";
+  $("earn-math-left").textContent = t("earn.math.left", { n: left, max: MATH_DAILY_LIMIT });
+  $("earn-math-submit").disabled = left === 0;
+  $("earn-guess-submit").disabled = rec.guessSolved;
+  renderFeedback("math");
+  renderFeedback("guess");
+}
+function openEarn() {
+  const rec = getRecord();
+  if (rec && isAdminName(rec.username)) { toastMsg(t("reward.admin")); return; }
+  feedback.math = feedback.guess = null;
+  showEarnView("menu");
+  openModal(earnOverlay);
+}
+function afterEarn(rec) { saveRecord(rec); renderHeader(view(rec)); renderEarn(); }
+
+function claimDaily() {
+  const rec = getRecord();
+  if (!rec || isAdminName(rec.username)) return;
+  if (rec.lastDaily === todayKey()) { toastMsg(t("earn.daily.already")); return; }
+  rec.points += DAILY_BONUS;
+  rec.lastDaily = todayKey();
+  afterEarn(rec);
+  toastMsg(t("earn.daily.success"));
+  confetti();
+}
+function submitMath() {
+  const rec = getRecord();
+  if (!rec || isAdminName(rec.username)) return;
+  const today = todayKey();
+  if (rec.mathDay !== today) { rec.mathDay = today; rec.mathCount = 0; }
+  if (rec.mathCount >= MATH_DAILY_LIMIT) { setFeedback("math", "earn.math.limit", {}, false); renderEarn(); return; }
+  const input = $("earn-math-input"), raw = input.value.trim();
+  if (!/^-?\d+$/.test(raw)) { setFeedback("math", "earn.math.invalid", {}, false); return; }   // input tak valid tidak memakai kesempatan
+  if (!mathQ) mathQ = makeMathQuestion();
+  const correct = Number(raw) === mathQ.answer;
+  rec.mathCount += 1;
+  if (correct) { rec.points += MATH_REWARD; setFeedback("math", "earn.math.right", { n: MATH_REWARD }, true); confetti(); }
+  else setFeedback("math", "earn.math.wrong", { answer: mathQ.answer }, false);
+  mathQ = makeMathQuestion();
+  input.value = "";
+  afterEarn(rec);
+}
+function submitGuess() {
+  const rec = getRecord();
+  if (!rec || isAdminName(rec.username)) return;
+  const input = $("earn-guess-input"), ans = normalizeName(input.value);
+  if (rec.guessSolved) { setFeedback("guess", "earn.guess.already", {}, false); return; }
+  if (!ans) { setFeedback("guess", "earn.guess.empty", {}, false); return; }                 // kosong tidak kena penalti
+  if (GUESS_ANSWERS.includes(ans)) {
+    rec.points += GUESS_REWARD;
+    rec.guessSolved = true;
+    setFeedback("guess", "earn.guess.right", { n: GUESS_REWARD }, true);
+    confetti();
+  } else {
+    const loss = Math.min(GUESS_PENALTY, rec.points);
+    rec.points -= loss;
+    setFeedback("guess", loss > 0 ? "earn.guess.wrong" : "earn.guess.wrongZero", { n: loss }, false);
+  }
+  input.value = "";
+  afterEarn(rec);
+}
+
+/* =========================================================
    EVENTS
    ========================================================= */
 loginBtn.addEventListener("click", login);
@@ -525,6 +745,19 @@ claimBtn.addEventListener("click", claimBonus);
 closeReward.addEventListener("click", () => closeModal(rewardOverlay));
 rewardOverlay.addEventListener("click", e => { if (e.target === rewardOverlay) closeModal(rewardOverlay); });
 
+earnBtn.addEventListener("click", openEarn);
+closeEarn.addEventListener("click", () => closeModal(earnOverlay));
+earnOverlay.addEventListener("click", e => { if (e.target === earnOverlay) closeModal(earnOverlay); });
+$("earn-opt-daily").addEventListener("click", () => showEarnView("daily"));
+$("earn-opt-math").addEventListener("click", () => { feedback.math = null; showEarnView("math"); $("earn-math-input").focus(); });
+$("earn-opt-guess").addEventListener("click", () => { feedback.guess = null; showEarnView("guess"); $("earn-guess-input").focus(); });
+$("earn-opt-tiktok").addEventListener("click", () => { closeModal(earnOverlay); openReward(); });
+["daily", "math", "guess"].forEach(v => $("earn-back-" + v).addEventListener("click", () => showEarnView("menu")));
+$("earn-daily-claim").addEventListener("click", claimDaily);
+$("earn-math-submit").addEventListener("click", submitMath);
+$("earn-math-input").addEventListener("keydown", e => { if (e.key === "Enter") submitMath(); });
+$("earn-guess-submit").addEventListener("click", submitGuess);
+$("earn-guess-input").addEventListener("keydown", e => { if (e.key === "Enter") submitGuess(); });
 renameBtn.addEventListener("click", openRename);
 renameSubmit.addEventListener("click", submitRename);
 renameInput.addEventListener("keydown", e => { if (e.key === "Enter") submitRename(); });
@@ -558,6 +791,10 @@ document.addEventListener("click", () => { langDropdown.classList.remove("show")
 /* =========================================================
    INIT
    ========================================================= */
+if (typeof window !== "undefined" && window.__MB_TEST__) {   // hook untuk tests/run-tests.js saja
+  window.__MB__ = { I18N, BALLS, GUESS_ANSWERS, makeMathQuestion, view, sanitize, setLanguage: l => setLanguage(l) };
+}
+
 (function init() {
   let stored = null;
   try { stored = localStorage.getItem(KEYS.lang); } catch { /* ignore */ }

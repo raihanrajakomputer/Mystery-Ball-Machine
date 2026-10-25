@@ -45,6 +45,7 @@
         <button id="rename-btn" class="rename-btn" type="button">✎ <span data-i18n="rename.open"></span></button>
       </div>
       <div class="points-badge">● <strong id="points">1000</strong> <span data-i18n="points"></span></div>
+      <button id="earn-btn" class="rename-btn earn-open" type="button" data-i18n="earn.open"></button>
     </div>
   </header>
 
@@ -126,6 +127,46 @@
       <button id="claim-btn" class="claim-btn"></button>
     </div>
     <p class="modal-note" data-i18n="reward.note"></p>
+  </div>
+</div>
+
+<div id="earn-overlay" class="modal-overlay" aria-hidden="true">
+  <div class="reward-modal earn-modal" role="dialog" aria-modal="true" aria-labelledby="earn-title">
+    <button id="close-earn" class="close-modal" data-i18n-aria="close">×</button>
+    <p class="eyebrow" data-i18n="earn.eyebrow"></p>
+    <h2 id="earn-title" data-i18n="earn.title"></h2>
+
+    <div id="earn-menu" class="earn-view">
+      <button id="earn-opt-daily" class="earn-option" type="button"><span class="earn-num">1</span><span class="earn-text"><strong data-i18n="earn.opt.daily.name"></strong><small data-i18n="earn.opt.daily.desc"></small><em id="earn-status-daily"></em></span></button>
+      <button id="earn-opt-math" class="earn-option" type="button"><span class="earn-num">2</span><span class="earn-text"><strong data-i18n="earn.opt.math.name"></strong><small data-i18n="earn.opt.math.desc"></small><em id="earn-status-math"></em></span></button>
+      <button id="earn-opt-guess" class="earn-option" type="button"><span class="earn-num">3</span><span class="earn-text"><strong data-i18n="earn.opt.guess.name"></strong><small data-i18n="earn.opt.guess.desc"></small><em id="earn-status-guess"></em></span></button>
+      <button id="earn-opt-tiktok" class="earn-option" type="button"><span class="earn-num">★</span><span class="earn-text"><strong data-i18n="earn.opt.tiktok.name"></strong><small data-i18n="earn.opt.tiktok.desc"></small><em id="earn-status-tiktok"></em></span></button>
+    </div>
+
+    <div id="earn-daily" class="earn-view" hidden>
+      <p class="earn-info" data-i18n="earn.daily.info"></p>
+      <button id="earn-daily-claim" class="claim-btn" type="button"></button>
+      <button id="earn-back-daily" class="earn-back" type="button" data-i18n="earn.back"></button>
+    </div>
+
+    <div id="earn-math" class="earn-view" hidden>
+      <p class="earn-info" data-i18n="earn.math.prompt"></p>
+      <div id="earn-math-question" class="earn-question"></div>
+      <input id="earn-math-input" class="earn-input" type="text" inputmode="numeric" autocomplete="off" data-i18n-placeholder="earn.math.placeholder">
+      <p id="earn-math-feedback" class="earn-feedback" role="status" hidden></p>
+      <button id="earn-math-submit" class="claim-btn" type="button" data-i18n="earn.math.submit"></button>
+      <p id="earn-math-left" class="earn-meta"></p>
+      <button id="earn-back-math" class="earn-back" type="button" data-i18n="earn.back"></button>
+    </div>
+
+    <div id="earn-guess" class="earn-view" hidden>
+      <div class="earn-question" data-i18n="earn.guess.question"></div>
+      <input id="earn-guess-input" class="earn-input" type="text" maxlength="40" autocomplete="off" data-i18n-placeholder="earn.guess.placeholder">
+      <p id="earn-guess-feedback" class="earn-feedback" role="status" hidden></p>
+      <button id="earn-guess-submit" class="claim-btn" type="button" data-i18n="earn.guess.submit"></button>
+      <p class="earn-meta" data-i18n="earn.guess.hint"></p>
+      <button id="earn-back-guess" class="earn-back" type="button" data-i18n="earn.back"></button>
+    </div>
   </div>
 </div>
 

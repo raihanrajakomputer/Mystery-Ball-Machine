@@ -376,4 +376,115 @@ button{cursor:pointer}
 #rename-title{font-size:32px}
 .reward-modal>p.form-error{color:#c0392b;font-size:13px;font-weight:700;margin:10px 0 0;max-width:none}
 #rename-overlay .reward-actions{margin-top:14px}
-@media(max-width:520px){.player-name-wrap>span{display:none}}
+
+/* ===== v3: menu tambah poin ===== */
+.earn-open{background:var(--yellow)}
+.earn-modal{max-height:92vh;overflow-y:auto}
+#earn-title{font-size:32px}
+.earn-option{display:flex;align-items:center;gap:14px;width:100%;margin:0 0 12px;padding:13px 14px;text-align:left;border:3px solid var(--line);border-radius:16px;background:#fff;color:var(--brown);box-shadow:4px 4px 0 var(--line);transition:.15s ease}
+.earn-option:hover:not(:disabled){transform:translate(-2px,-2px);background:#fff8e1}
+.earn-option:disabled{opacity:.55;cursor:not-allowed;box-shadow:none}
+.earn-num{flex:0 0 38px;height:38px;display:grid;place-items:center;border:3px solid var(--line);border-radius:50%;background:var(--yellow);font-family:"Archivo Black",Impact,sans-serif}
+.earn-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+.earn-text strong{font-size:15px}
+.earn-text small{font-size:12px;color:var(--muted);line-height:1.35}
+.earn-text em{font-style:normal;font-size:11px;font-weight:700;color:var(--orange-dark)}
+.earn-info{color:var(--muted);line-height:1.5;margin:0 0 14px}
+.earn-question{font-family:"Archivo Black",Impact,sans-serif;font-size:26px;line-height:1.15;margin:6px 0 16px}
+.earn-input{width:100%;border:3px solid var(--line);border-radius:14px;padding:14px 16px;outline:none;background:#fff;margin-bottom:6px}
+.earn-input:focus{box-shadow:4px 4px 0 var(--yellow)}
+.earn-feedback{font-size:13px;font-weight:700;margin:8px 0 10px}
+.earn-feedback.ok{color:var(--green)}.earn-feedback.bad{color:#c0392b}
+.earn-meta{font-size:11px;color:#9a887a;margin:10px 0 0}
+.earn-back{margin-top:12px;border:0;background:transparent;color:var(--brown);font-weight:700;font-size:12px;text-decoration:underline}
+.earn-view .claim-btn{margin-top:4px}
+.claim-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
+/* ===== v4: tampilan HP potret (Android) ===== */
+html{-webkit-text-size-adjust:100%}
+body{min-height:100vh;min-height:100dvh;overflow-x:hidden}
+.page{min-height:100vh;min-height:100dvh}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.reward-modal{max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);overflow-y:auto}
+
+/* urutan section di layar sempit: intro -> mesin -> hasil -> koleksi */
+@media(max-width:900px){
+  .collection-strip{order:3}
+}
+
+/* HP potret */
+@media(max-width:640px){
+  /* tombol bahasa ikut scroll, tidak menutupi topbar */
+  .language-switcher{position:absolute;top:12px;right:12px}
+  .language-toggle{min-width:0;padding:8px 10px;font-size:12px;gap:6px}
+  .language-dropdown{width:150px}
+
+  /* topbar: logo di atas, info pemain di bawah */
+  .topbar{flex-direction:column;align-items:flex-start;gap:10px;padding:14px 16px 6px}
+  .brand{font-size:20px;min-height:38px;display:flex;align-items:center}
+  .player{width:100%;flex-wrap:wrap;gap:8px;justify-content:space-between}
+  .player-name-wrap{min-width:0;max-width:100%}
+  #player-name{display:inline-block;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .points-badge{padding:7px 11px;font-size:12px}
+  .rename-btn{padding:7px 11px;font-size:11px}
+
+  /* tombol buku: pindah jadi tombol melayang di kanan bawah */
+  .book-tab{
+    top:auto;bottom:16px;right:12px;transform:none;
+    width:auto;min-height:0;padding:10px 14px;
+    flex-direction:row;gap:8px;
+    border:3px solid var(--line);border-radius:999px;
+    box-shadow:4px 4px 0 var(--line);
+  }
+  .book-tab:hover{width:auto}
+  .book-icon{font-size:20px;line-height:1}
+  .book-word{writing-mode:horizontal-tb;font-size:12px}
+
+  /* layout utama: lebar penuh, ruang bawah untuk tombol buku */
+  .game-layout{padding:10px 16px 96px;gap:22px}
+  .intro h2{font-size:clamp(34px,11vw,46px)}
+  .hint{max-width:280px;font-size:14px}
+
+  /* mesin */
+  .machine{width:min(320px,88vw);box-shadow:8px 10px 0 var(--line)}
+  .machine-sign{font-size:26px}
+  .spin-btn{padding:16px;font-size:20px}
+
+  /* hasil + koleksi */
+  .result-card{min-height:0;padding:20px}
+  .collection-strip{padding-top:22px}
+  .collection-preview{grid-template-columns:repeat(2,1fr);gap:10px}
+  .collection-slot{min-height:108px;padding:12px}
+
+  /* buku koleksi: penuh layar, 2 kolom ringkas */
+  .book-drawer{width:100%;border-left:0;padding:20px 14px 90px}
+  .book-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .book-card{min-height:0;padding:12px}
+  .book-card-name{font-size:12px}
+  .book-ball{width:72px;height:72px;margin:10px auto}
+  .book-ball .face-eye{width:10px;height:13px;top:20px}
+  .book-ball .face-eye.left{left:18px}
+  .book-ball .face-eye.right{right:18px}
+  .book-ball .face-mouth{left:23px;bottom:16px;width:24px;height:12px}
+  .book-card-footer{font-size:10px}
+
+  /* popup */
+  .modal-overlay{padding:14px}
+  .reward-modal{padding:28px 18px;border-radius:22px;box-shadow:6px 6px 0 var(--yellow)}
+  .reward-modal h2{font-size:30px}
+  .reward-ball{width:60px;height:60px;font-size:26px}
+  #earn-title,#rename-title{font-size:26px}
+  .earn-question{font-size:20px}
+  .earn-option{padding:11px 12px;gap:10px}
+  .earn-num{flex-basis:34px;height:34px}
+
+  /* toast naik supaya tidak tertutup tombol buku */
+  .toast{bottom:80px;max-width:calc(100vw - 32px)}
+}
+
+/* HP kecil (<= 360px) */
+@media(max-width:360px){
+  .collection-preview{grid-template-columns:repeat(2,1fr)}
+  .book-grid{grid-template-columns:1fr}
+  #player-name{max-width:100px}
+}
