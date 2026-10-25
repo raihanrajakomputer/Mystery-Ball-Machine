@@ -16,6 +16,9 @@ const DAILY_BONUS = 200;                                // claim harian
 const MATH_REWARD = 100, MATH_DAILY_LIMIT = 5;          // teka-teki matematika: poin & batas percobaan/hari
 const GUESS_REWARD = 500, GUESS_PENALTY = 10;           // tebak nama admin (hadiah hanya sekali per akun)
 const GUESS_ANSWERS = ["rey", "rei", "rai", "raihan", "raihan al", "raihan al rajab"];
+/* Hadiah koleksi (diambil manual lewat tombol AMBIL, sekali per akun) */
+const COUNT_REWARDS = [{ n: 3, points: 200 }, { n: 5, points: 400 }, { n: 10, points: 800 }];   // punya N bola berbeda
+const TIER_REWARDS = { uncommon: 300, rare: 500, epic: 1000, legendary: 5000 };                  // semua bola 1 rarity lengkap
 const GLOBAL_VARS = { cost: COST, points: START_POINTS, bonus: TIKTOK_REWARD, dup: DUP_BONUS, daily: DAILY_BONUS,
   mathReward: MATH_REWARD, mathMax: MATH_DAILY_LIMIT, guessReward: GUESS_REWARD, penalty: GUESS_PENALTY };
 
@@ -56,6 +59,44 @@ const BALLS = [
 ];
 const ALL_IDS = BALLS.map(b => b.id);
 const ID_SET = new Set(ALL_IDS);
+
+/* =========================================================
+   HADIAH KOLEKSI: daftar hadiah + cara menghitung progress
+   ========================================================= */
+const REWARDS = [
+  ...COUNT_REWARDS.map(r => ({ id: "count" + r.n, type: "count", n: r.n, points: r.points })),
+  ...TIERS.filter(tier => TIER_REWARDS[tier]).map(tier => ({ id: "tier-" + tier, type: "tier", tier, points: TIER_REWARDS[tier] }))
+];
+const REWARD_IDS = new Set(REWARDS.map(r => r.id));
+
+/* ACHIEVEMENT (hadiah poin, diambil manual, sekali per akun)
+   stat  = angka yang dihitung game di data akun (spins, dupCount, mathCorrect, dailyCount)
+   tiers = cukup punya bola dari rarity tersebut
+   need  = target, points = hadiah, cls = warna garis kiri (opsional) */
+const ACHIEVEMENTS = [
+  { id: "spin5",  icon: "🎯", stat: "spins",       need: 5,  points: 50 },
+  { id: "spin10", icon: "🎲", stat: "spins",       need: 10, points: 100 },
+  { id: "spin15", icon: "🔥", stat: "spins",       need: 15, points: 150 },
+  { id: "spin20", icon: "👑", stat: "spins",       need: 20, points: 200 },
+  { id: "spin50", icon: "🏃", stat: "spins",       need: 50, points: 500 },
+  { id: "twins",  icon: "👯", stat: "dupCount",    need: 5,  points: 150,  cls: "uncommon" },
+  { id: "math",   icon: "🧠", stat: "mathCorrect", need: 5,  points: 150,  cls: "epic" },
+  { id: "daily",  icon: "📅", stat: "dailyCount",  need: 3,  points: 200 },
+  { id: "rare",   icon: "💜", tiers: ["rare", "epic", "legendary"], need: 1, points: 300,  cls: "rare" },
+  { id: "legend", icon: "🌟", tiers: ["legendary"],                 need: 1, points: 1000, cls: "legendary" }
+];
+const ACH_IDS = new Set(ACHIEVEMENTS.map(a => a.id));
+function achProgress(a, v) {
+  const have = a.stat ? (v[a.stat] || 0) : BALLS.filter(b => a.tiers.includes(b.tier) && v.collection.includes(b.id)).length;
+  return { have: Math.min(have, a.need), need: a.need };
+}
+function achDone(a, v) { const p = achProgress(a, v); return p.have >= p.need; }
+function rewardProgress(r, collection) {
+  if (r.type === "count") return { have: Math.min(collection.length, r.n), need: r.n };
+  const ids = BALLS.filter(b => b.tier === r.tier).map(b => b.id);
+  return { have: ids.filter(id => collection.includes(id)).length, need: ids.length };
+}
+function rewardReached(r, collection) { const p = rewardProgress(r, collection); return p.have >= p.need; }
 const ballText = (b, lang) => (lang === "id" ? b.idn : b.mak);
 
 /* =========================================================
@@ -164,6 +205,29 @@ const I18N = {
     "rename.done": "Username diganti menjadi {name}.",
     "rename.adminOn": "Mode admin aktif! Poin ∞ dan semua bola terbuka.",
     "rename.adminOff": "Mode admin dimatikan. Data asli kamu dipulihkan.",
+    "colrew.title": "HADIAH KOLEKSI",
+    "colrew.hint": "Capai syaratnya, lalu tekan AMBIL untuk menerima poin. Sekali per akun.",
+    "colrew.count": "Punya {n} bola",
+    "colrew.tier": "Koleksi {rarity} lengkap",
+    "tab.collection": "KOLEKSI",
+    "tab.rewards": "HADIAH",
+    "tab.achievements": "ACHIEVEMENT",
+    "claim.button": "AMBIL +{n}",
+    "claim.done": "DIAMBIL",
+    "claim.success": "Diambil: {name}! +{n} poin.",
+    "claim.new": "Ada {n} hadiah yang bisa diambil. Buka BUKU!",
+    "ach.title": "ACHIEVEMENT",
+    "ach.hint": "Selesaikan tantangan, lalu tekan AMBIL untuk menerima poin. Sekali per akun.",
+    "ach.spin5.name": "Pemanasan", "ach.spin5.desc": "Putar mesin 5 kali.",
+    "ach.spin10.name": "Mulai Penasaran", "ach.spin10.desc": "Putar mesin 10 kali.",
+    "ach.spin15.name": "Ketagihan", "ach.spin15.desc": "Putar mesin 15 kali.",
+    "ach.spin20.name": "Raja Mesin", "ach.spin20.desc": "Putar mesin 20 kali.",
+    "ach.spin50.name": "Maraton Putar", "ach.spin50.desc": "Putar mesin 50 kali.",
+    "ach.twins.name": "Bola Kembar", "ach.twins.desc": "Dapat bola kembar 5 kali.",
+    "ach.math.name": "Otak Encer", "ach.math.desc": "Jawab benar 5 teka-teki matematika.",
+    "ach.daily.name": "Rajin Berkunjung", "ach.daily.desc": "Claim harian 3 kali.",
+    "ach.rare.name": "Pemburu Langka", "ach.rare.desc": "Dapatkan bola Langka atau lebih tinggi.",
+    "ach.legend.name": "Sang Penemu", "ach.legend.desc": "Dapatkan bola Legendaris.",
     "rarity.common": "BIASA", "rarity.uncommon": "TIDAK BIASA", "rarity.rare": "LANGKA",
     "rarity.epic": "EPIC", "rarity.legendary": "LEGENDARIS"
   },
@@ -269,6 +333,29 @@ const I18N = {
     "rename.done": "Username niganti jari {name}.",
     "rename.adminOn": "Mode admin aktif! Poin ∞ siagang kamma-kammanna ball.",
     "rename.adminOff": "Mode admin nimatei. Data asli ta nipulihkan.",
+    "colrew.title": "HADIAH KOLEKSI",
+    "colrew.hint": "Capai syaratna, terus pencet ALLE untuk tarima poin. Se're ri se're akun.",
+    "colrew.count": "Nipunnai {n} ball",
+    "colrew.tier": "Koleksi {rarity} lengkapmi",
+    "tab.collection": "KOLEKSI",
+    "tab.rewards": "HADIAH",
+    "tab.achievements": "ACHIEVEMENT",
+    "claim.button": "ALLE +{n}",
+    "claim.done": "NIALLEMI",
+    "claim.success": "Nialle: {name}! +{n} poin.",
+    "claim.new": "Niak {n} hadiah na bulle nialle. Buka BUKU!",
+    "ach.title": "ACHIEVEMENT",
+    "ach.hint": "Tammatkan tantangan, terus pencet ALLE untuk tarima poin. Se're ri se're akun.",
+    "ach.spin5.name": "Pemanasan", "ach.spin5.desc": "Putar mesing 5 kali.",
+    "ach.spin10.name": "Mulai Penasaran", "ach.spin10.desc": "Putar mesing 10 kali.",
+    "ach.spin15.name": "Ketagihanki", "ach.spin15.desc": "Putar mesing 15 kali.",
+    "ach.spin20.name": "Raja Mesing", "ach.spin20.desc": "Putar mesing 20 kali.",
+    "ach.spin50.name": "Maraton Putar", "ach.spin50.desc": "Putar mesing 50 kali.",
+    "ach.twins.name": "Ball Sikamma", "ach.twins.desc": "Alle ball sikamma 5 kali.",
+    "ach.math.name": "Otak Encer", "ach.math.desc": "Jawab benar 5 teka-teki matematika.",
+    "ach.daily.name": "Rajin Lampa Mae", "ach.daily.desc": "Claim se're allo 3 kali.",
+    "ach.rare.name": "Pemburu Langka", "ach.rare.desc": "Alle ball Langka atau lebih tinggi.",
+    "ach.legend.name": "Sang Penemu", "ach.legend.desc": "Alle ball Legendari.",
     "rarity.common": "BIASA", "rarity.uncommon": "TENA BIASA", "rarity.rare": "LANGKA",
     "rarity.epic": "EPIC", "rarity.legendary": "LEGENDARI"
   }
@@ -302,7 +389,8 @@ const resultTitle = $("result-title"), resultMessage = $("result-message"), resu
 const collectionCount = $("collection-count"), collectionPreview = $("collection-preview");
 const machine = document.querySelector(".machine"), dispense = $("dispense"), toast = $("toast");
 const bookBtn = $("book-btn"), bookOverlay = $("book-overlay"), closeBook = $("close-book"), bookGrid = $("book-grid");
-const bookCount = $("book-count"), bookProgress = $("book-progress"), rarityGuide = $("rarity-guide");
+const bookCount = $("book-count"), bookProgress = $("book-progress"), rarityGuide = $("rarity-guide"), rewardList = $("reward-list");
+const achList = $("ach-list"), dotRewards = $("dot-rewards"), dotAch = $("dot-ach"), bookBadge = $("book-badge");
 const rewardOverlay = $("reward-overlay"), closeReward = $("close-reward"), tiktokBtn = $("tiktok-btn"), claimBtn = $("claim-btn");
 const renameBtn = $("rename-btn"), renameOverlay = $("rename-overlay"), closeRename = $("close-rename");
 const earnBtn = $("earn-btn"), earnOverlay = $("earn-overlay"), closeEarn = $("close-earn");
@@ -326,6 +414,7 @@ function setSession(u) { try { localStorage.setItem(KEYS.session, u); } catch { 
 const normalizeName = s => String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
 const isAdminName = u => ADMIN_USERNAMES.includes(normalizeName(u));
 
+const cnt = n => (Number.isInteger(n) && n > 0 ? n : 0);   // angka hitungan: bilangan bulat >= 0
 function sanitize(username, r) {
   r = r && typeof r === "object" ? r : {};
   return {
@@ -336,7 +425,10 @@ function sanitize(username, r) {
     lastDaily: typeof r.lastDaily === "string" ? r.lastDaily : null,
     mathDay: typeof r.mathDay === "string" ? r.mathDay : null,
     mathCount: Number.isInteger(r.mathCount) && r.mathCount > 0 ? r.mathCount : 0,
-    guessSolved: !!r.guessSolved
+    guessSolved: !!r.guessSolved,
+    rewards: [...new Set(Array.isArray(r.rewards) ? r.rewards : [])].filter(id => REWARD_IDS.has(id)),          // hadiah koleksi yang sudah diambil
+    achievements: [...new Set(Array.isArray(r.achievements) ? r.achievements : [])].filter(id => ACH_IDS.has(id)), // achievement yang sudah diambil
+    spins: cnt(r.spins), dupCount: cnt(r.dupCount), mathCorrect: cnt(r.mathCorrect), dailyCount: cnt(r.dailyCount)
   };
 }
 function getRecord() {
@@ -426,6 +518,77 @@ function renderBook(v) {
   bookCount.textContent = `${v.collection.length} / ${BALLS.length}`;
   bookProgress.style.width = `${v.collection.length / BALLS.length * 100}%`;
   rarityGuide.innerHTML = TIERS.map(r => `<span class="guide ${r}">${t("rarity." + r)}</span>`).join("");
+  renderRewards(v);
+  renderAchievements(v);
+  renderBadges(v);
+}
+const rewardName = r => (r.type === "count" ? t("colrew.count", { n: r.n }) : t("colrew.tier", { rarity: t("rarity." + r.tier) }));
+const achName = a => t("ach." + a.id + ".name");
+const achDesc = a => t("ach." + a.id + ".desc");
+
+/* Satu baris hadiah/achievement.
+   status: "locked" = belum tercapai, "ready" = tombol AMBIL, "claimed" = sudah diambil (centang hijau) */
+function buildRewardItem({ kind, id, cls, icon, name, sub, points, status }) {
+  const x = document.createElement("div");
+  x.className = `reward-item ${cls} ${status}`;
+  x.innerHTML = '<span class="reward-state"></span><div class="reward-info"><span class="reward-name"></span><span class="reward-progress"></span></div><div class="reward-action"></div>';
+  x.querySelector(".reward-state").textContent = status === "claimed" ? "✓" : icon;
+  x.querySelector(".reward-name").textContent = name;
+  x.querySelector(".reward-progress").textContent = sub;
+  const act = x.querySelector(".reward-action");
+  if (status === "ready") {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "claim-mini";
+    b.dataset.claim = kind + ":" + id;
+    b.textContent = t("claim.button", { n: points });
+    act.appendChild(b);
+  } else {
+    const tag = document.createElement("span");
+    tag.className = status === "claimed" ? "claimed-tag" : "reward-pts";
+    tag.textContent = status === "claimed" ? "✓ " + t("claim.done") : "+" + points;
+    act.appendChild(tag);
+  }
+  return x;
+}
+const itemStatus = (claimed, reached) => (claimed ? "claimed" : reached ? "ready" : "locked");
+
+function renderRewards(v) {
+  rewardList.innerHTML = "";
+  REWARDS.forEach(r => {
+    const p = rewardProgress(r, v.collection);
+    const status = itemStatus(v.admin || v.rewards.includes(r.id), p.have >= p.need);
+    rewardList.appendChild(buildRewardItem({ kind: "reward", id: r.id, cls: r.type === "tier" ? r.tier : "count", icon: "○",
+      name: rewardName(r), sub: `${p.have} / ${p.need}`, points: r.points, status }));
+  });
+}
+function renderAchievements(v) {
+  achList.innerHTML = "";
+  ACHIEVEMENTS.forEach(a => {
+    const p = v.admin ? { have: a.need, need: a.need } : achProgress(a, v);
+    const status = itemStatus(v.admin || v.achievements.includes(a.id), p.have >= p.need);
+    achList.appendChild(buildRewardItem({ kind: "ach", id: a.id, cls: a.cls || "count", icon: a.icon,
+      name: achName(a), sub: `${achDesc(a)} (${p.have} / ${p.need})`, points: a.points, status }));
+  });
+}
+
+/* Titik merah di tab + angka di tombol BUKU = jumlah hadiah yang siap diambil */
+function claimableCount(v) {
+  if (v.admin) return { r: 0, a: 0 };
+  return {
+    r: REWARDS.filter(r => !v.rewards.includes(r.id) && rewardReached(r, v.collection)).length,
+    a: ACHIEVEMENTS.filter(a => !v.achievements.includes(a.id) && achDone(a, v)).length
+  };
+}
+let knownClaimable = 0;
+function renderBadges(v) {
+  const c = claimableCount(v), total = c.r + c.a;
+  dotRewards.hidden = !c.r;
+  dotAch.hidden = !c.a;
+  bookBadge.hidden = !total;
+  bookBadge.textContent = String(total);
+  if (total > knownClaimable) setTimeout(() => toastMsg(t("claim.new", { n: total })), 2500);   // setelah toast lain selesai
+  knownClaimable = total;
 }
 function renderReward() {
   const rec = getRecord();
@@ -480,6 +643,44 @@ function pickBall() {
   return BALLS[0];
 }
 
+/* Ambil hadiah koleksi / achievement (manual, sekali per akun, syarat dicek ulang di sini) */
+function claimReward(id) {
+  const rec = getRecord(), r = REWARDS.find(x => x.id === id);
+  if (!rec || !r || isAdminName(rec.username)) return;
+  if (rec.rewards.includes(id) || !rewardReached(r, rec.collection)) return;
+  rec.rewards.push(id);
+  rec.points += r.points;
+  afterClaim(rec, rewardName(r), r.points);
+}
+function claimAchievement(id) {
+  const rec = getRecord(), a = ACHIEVEMENTS.find(x => x.id === id);
+  if (!rec || !a || isAdminName(rec.username)) return;
+  if (rec.achievements.includes(id) || !achDone(a, rec)) return;
+  rec.achievements.push(id);
+  rec.points += a.points;
+  afterClaim(rec, achName(a), a.points);
+}
+function afterClaim(rec, name, points) {
+  saveRecord(rec);
+  const v = view(rec);
+  renderHeader(v);
+  renderBook(v);
+  toastMsg(t("claim.success", { name, n: points }));
+  confetti();
+}
+function onClaimClick(e) {
+  const b = e.target.closest("[data-claim]");
+  if (!b) return;
+  const [kind, id] = b.dataset.claim.split(":");
+  if (kind === "reward") claimReward(id); else claimAchievement(id);
+}
+function setBookTab(name) {
+  document.querySelectorAll(".drawer-tab").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+  document.querySelectorAll(".book-panel").forEach(p => p.classList.toggle("active", p.dataset.panel === name));
+  const drawer = document.querySelector(".book-drawer");
+  if (drawer) drawer.scrollTop = 0;
+}
+
 function enterGame() {
   loginPage.classList.remove("active");
   gamePage.classList.add("active");
@@ -514,6 +715,7 @@ function spin() {
   const dupBonus = !v.admin && !isNewBall ? DUP_BONUS : 0;
   if (!v.admin) rec.points = rec.points - COST + dupBonus;
   if (!rec.collection.includes(ball.id)) rec.collection.push(ball.id);
+  if (!v.admin) { rec.spins += 1; if (!isNewBall) rec.dupCount += 1; }   // hitungan untuk achievement
   saveRecord(rec);
 
   spinning = true;
@@ -680,7 +882,7 @@ function openEarn() {
   showEarnView("menu");
   openModal(earnOverlay);
 }
-function afterEarn(rec) { saveRecord(rec); renderHeader(view(rec)); renderEarn(); }
+function afterEarn(rec) { saveRecord(rec); renderHeader(view(rec)); renderEarn(); renderBook(view(rec)); }
 
 function claimDaily() {
   const rec = getRecord();
@@ -688,6 +890,7 @@ function claimDaily() {
   if (rec.lastDaily === todayKey()) { toastMsg(t("earn.daily.already")); return; }
   rec.points += DAILY_BONUS;
   rec.lastDaily = todayKey();
+  rec.dailyCount += 1;
   afterEarn(rec);
   toastMsg(t("earn.daily.success"));
   confetti();
@@ -703,7 +906,7 @@ function submitMath() {
   if (!mathQ) mathQ = makeMathQuestion();
   const correct = Number(raw) === mathQ.answer;
   rec.mathCount += 1;
-  if (correct) { rec.points += MATH_REWARD; setFeedback("math", "earn.math.right", { n: MATH_REWARD }, true); confetti(); }
+  if (correct) { rec.points += MATH_REWARD; rec.mathCorrect += 1; setFeedback("math", "earn.math.right", { n: MATH_REWARD }, true); confetti(); }
   else setFeedback("math", "earn.math.wrong", { answer: mathQ.answer }, false);
   mathQ = makeMathQuestion();
   input.value = "";
@@ -739,6 +942,9 @@ spinBtn.addEventListener("click", spin);
 bookBtn.addEventListener("click", openBook);
 closeBook.addEventListener("click", closeBookDrawer);
 bookOverlay.addEventListener("click", e => { if (e.target === bookOverlay) closeBookDrawer(); });
+document.querySelectorAll(".drawer-tab").forEach(btn => btn.addEventListener("click", () => setBookTab(btn.dataset.tab)));
+rewardList.addEventListener("click", onClaimClick);
+achList.addEventListener("click", onClaimClick);
 
 tiktokBtn.addEventListener("click", () => { window.open(TIKTOK_URL, "_blank", "noopener,noreferrer"); toastMsg(t("reward.openTiktok")); });
 claimBtn.addEventListener("click", claimBonus);
@@ -792,7 +998,7 @@ document.addEventListener("click", () => { langDropdown.classList.remove("show")
    INIT
    ========================================================= */
 if (typeof window !== "undefined" && window.__MB_TEST__) {   // hook untuk tests/run-tests.js saja
-  window.__MB__ = { I18N, BALLS, GUESS_ANSWERS, makeMathQuestion, view, sanitize, setLanguage: l => setLanguage(l) };
+  window.__MB__ = { I18N, BALLS, GUESS_ANSWERS, REWARDS, ACHIEVEMENTS, claimReward, claimAchievement, achProgress, getRecord, makeMathQuestion, view, sanitize, setLanguage: l => setLanguage(l) };
 }
 
 (function init() {

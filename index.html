@@ -50,7 +50,7 @@
   </header>
 
   <button id="book-btn" class="book-tab" data-i18n-aria="book.open">
-    <span class="book-icon">▤</span><span class="book-word" data-i18n="book.word"></span>
+    <span class="book-icon">▤</span><span class="book-word" data-i18n="book.word"></span><i id="book-badge" class="book-badge" hidden></i>
   </button>
 
   <main class="game-layout">
@@ -106,12 +106,33 @@
       <div><p class="eyebrow" data-i18n="book.eyebrow"></p><h2 data-i18n="book.title"></h2></div>
       <button id="close-book" class="close-book" data-i18n-aria="close">×</button>
     </div>
+    <div class="drawer-tabs" role="tablist">
+      <button type="button" class="drawer-tab active" data-tab="collection"><span data-i18n="tab.collection"></span></button>
+      <button type="button" class="drawer-tab" data-tab="rewards"><span data-i18n="tab.rewards"></span><i id="dot-rewards" class="tab-dot" hidden></i></button>
+      <button type="button" class="drawer-tab" data-tab="achievements"><span data-i18n="tab.achievements"></span><i id="dot-ach" class="tab-dot" hidden></i></button>
+    </div>
+    <div class="book-panel active" data-panel="collection">
     <div class="book-progress">
       <div class="book-progress-head"><span data-i18n="book.progress"></span><strong id="book-count">0 / 10</strong></div>
       <div class="progress-bar"><span id="book-progress"></span></div>
     </div>
     <div id="rarity-guide" class="rarity-guide"></div>
     <div id="book-grid" class="book-grid"></div>
+    </div>
+    <div class="book-panel" data-panel="rewards">
+      <section class="reward-section">
+        <h3 data-i18n="colrew.title"></h3>
+        <p class="reward-hint" data-i18n="colrew.hint"></p>
+        <div id="reward-list" class="reward-list"></div>
+      </section>
+    </div>
+    <div class="book-panel" data-panel="achievements">
+      <section class="reward-section">
+        <h3 data-i18n="ach.title"></h3>
+        <p class="reward-hint" data-i18n="ach.hint"></p>
+        <div id="ach-list" class="reward-list"></div>
+      </section>
+    </div>
   </aside>
 </div>
 

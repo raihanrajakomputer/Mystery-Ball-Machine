@@ -488,3 +488,39 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   .book-grid{grid-template-columns:1fr}
   #player-name{max-width:100px}
 }
+
+/* ===== v5: hadiah koleksi ===== */
+.reward-section{margin:0 0 20px}
+.reward-section h3{font-family:"Archivo Black",Impact,sans-serif;font-size:18px;margin:0 0 4px}
+.reward-hint{font-size:11px;color:var(--muted);line-height:1.4;margin:0 0 10px}
+.reward-list{display:grid;gap:8px}
+.reward-item{--c:var(--yellow);display:flex;align-items:center;gap:10px;padding:10px 12px;border:3px solid var(--line);border-left:10px solid var(--c);border-radius:14px;background:#fff8e9}
+.reward-item.uncommon{--c:var(--uncommon)}
+.reward-item.rare{--c:var(--rare)}
+.reward-item.epic{--c:var(--epic)}
+.reward-item.legendary{--c:var(--legendary)}
+.reward-item.claimed{background:#e3f3e3}
+.reward-state{flex:0 0 34px;height:34px;display:grid;place-items:center;border:2px solid var(--line);border-radius:50%;background:#fff;font-size:16px;font-weight:700}
+.reward-item.claimed .reward-state{background:var(--green);color:#fff}
+.reward-info{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.reward-name{font-size:13px;font-weight:700;line-height:1.25}
+.reward-progress{font-size:11px;color:var(--muted)}
+.reward-item.claimed .reward-progress{color:var(--green);font-weight:700}
+.reward-pts{font-family:"Archivo Black",Impact,sans-serif;font-size:14px;white-space:nowrap}
+
+/* ===== v6: tab buku, tombol AMBIL, centang hijau ===== */
+.drawer-tabs{display:flex;gap:6px;margin:16px 0 4px;padding:4px;border:3px solid var(--line);border-radius:14px;background:#eadbc5}
+.drawer-tab{flex:1;position:relative;border:0;border-radius:9px;background:transparent;color:var(--brown);padding:10px 4px;font-size:11px;font-weight:700;letter-spacing:.04em}
+.drawer-tab.active{background:var(--yellow);box-shadow:0 0 0 2px var(--line)}
+.tab-dot{position:absolute;top:2px;right:2px;width:11px;height:11px;border-radius:50%;background:#e03131;border:2px solid var(--paper)}
+.book-panel{display:none}
+.book-panel.active{display:block}
+.book-badge{position:absolute;top:-9px;left:-9px;min-width:22px;height:22px;padding:0 5px;display:grid;place-items:center;border:2px solid var(--line);border-radius:999px;background:#e03131;color:#fff;font:700 11px/1 "DM Sans",Arial,sans-serif;font-style:normal;writing-mode:horizontal-tb;animation:badgePulse 1.4s ease-in-out infinite}
+@keyframes badgePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.reward-action{flex:0 0 auto}
+.claim-mini{border:3px solid var(--line);border-radius:12px;background:var(--orange);color:#fff;padding:9px 11px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:3px 3px 0 var(--line);transition:.12s ease}
+.claim-mini:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--line)}
+.claimed-tag{display:inline-block;padding:6px 10px;border:2px solid var(--line);border-radius:999px;background:var(--green);color:#fff;font-size:10px;font-weight:700;white-space:nowrap}
+.reward-item.ready{background:#fff3b0;animation:readyGlow 1.6s ease-in-out infinite}
+.reward-item.locked .reward-state{filter:grayscale(1);opacity:.6}
+@keyframes readyGlow{0%,100%{box-shadow:0 0 0 rgba(243,107,33,0)}50%{box-shadow:0 0 14px rgba(243,107,33,.7)}}
