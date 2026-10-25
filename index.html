@@ -7,14 +7,32 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+<div id="language-switcher" class="language-switcher">
+  <button id="language-toggle" class="language-toggle" type="button">
+    <span id="language-flag">🇮🇩</span>
+    <span id="language-label">Indonesia</span>
+    <span class="language-chevron">⌄</span>
+  </button>
+  <div id="language-dropdown" class="language-dropdown">
+    <button type="button" class="language-choice" data-language="id">
+      <span>🇮🇩</span><span>Indonesia</span>
+    </button>
+    <button type="button" class="language-choice" data-language="mak">
+      <span>🏴</span><span>Makassar</span>
+    </button>
+  </div>
+</div>
+
 <section id="login-page" class="page active">
   <div class="login-card">
-    <div class="eyebrow">★ MYSTERY MACHINE ★</div>
+    <div class="eyebrow">★ MESING MISTERI ★</div>
     <h1>MYSTERY<br><span>BALL</span></h1>
-    <p class="tagline">Something is waiting inside.</p>
-    <input id="name-input" type="text" maxlength="18" placeholder="Enter your name">
-    <button id="login-btn" class="primary-btn">ENTER THE MACHINE</button>
-    <p class="tiny">New players receive 1000 points.</p>
+    <p class="tagline">Salamakki battu mae!</p>
+    <p class="login-question">Nai arenta?</p>
+    <input id="name-input" type="text" maxlength="18" placeholder="Tulis arengta...">
+    <button id="login-btn" class="primary-btn">MASUK RI MESING</button>
+    <p class="tiny">Pemain baru tarimai 1000 poin.</p>
   </div>
 </section>
 
@@ -22,16 +40,20 @@
   <header class="topbar">
     <div class="brand">MYSTERY<span>BALL</span></div>
     <div class="player">
-      <span id="player-name">PLAYER</span>
-      <div class="points-badge">● <strong id="points">1000</strong></div>
+      <span id="player-name">PAKARENA</span>
+      <div class="points-badge">● <strong id="points">1000</strong> POIN</div>
     </div>
   </header>
 
+  <button id="book-btn" class="book-tab" aria-label="Buka buku koleksi">
+    <span class="book-icon">▤</span><span class="book-word">BUKU</span>
+  </button>
+
   <main class="game-layout">
     <div class="intro">
-      <p class="eyebrow">TODAY'S CHANCE</p>
-      <h2>What will<br>you get?</h2>
-      <div class="hint">Every spin costs <b>150</b> points.</div>
+      <p class="eyebrow">CINI'KI APA NA EROI</p>
+      <h2>APA<br>NA NIALLA?</h2>
+      <div class="hint">Se're putaran = 150 poin.</div>
     </div>
 
     <div class="machine-wrap">
@@ -40,38 +62,69 @@
         <div class="machine-glass">
           <div class="shine"></div>
           <div class="balls">
-            <div class="ball orange"></div><div class="ball yellow"></div>
-            <div class="ball orange small"></div><div class="ball yellow small"></div>
-            <div class="ball orange"></div><div class="ball yellow"></div>
-            <div class="ball orange small"></div>
+            <div class="ball common"></div><div class="ball uncommon"></div>
+            <div class="ball rare small"></div><div class="ball epic small"></div>
+            <div class="ball legendary"></div><div class="ball uncommon small"></div>
+            <div class="ball rare"></div>
           </div>
+          <div class="cartoon-face"><span class="eye left"></span><span class="eye right"></span><span class="mouth"></span></div>
         </div>
         <div class="machine-body">
-          <div class="machine-label">INSERT 150 PTS</div>
-          <button id="spin-btn" class="spin-btn">SPIN <span>↻</span></button>
-          <div class="dispense">?</div>
+          <div class="machine-label">SE'RE PUTARAN • 150 POIN</div>
+          <button id="spin-btn" class="spin-btn">PUTAR <span>↻</span></button>
+          <div class="dispense" id="dispense">?</div>
         </div>
         <div class="machine-base"></div>
       </div>
     </div>
 
     <section class="result-card">
-      <span class="result-label">YOUR RESULT</span>
-      <div id="result-icon" class="result-icon">?</div>
-      <h3 id="result-title">Mystery awaits.</h3>
-      <p id="result-message">Press SPIN and see what the machine has for you.</p>
+      <span class="result-label">HASILTA</span>
+      <div id="result-ball" class="mini-ball result-ball common"><span class="face-eye left"></span><span class="face-eye right"></span><span class="face-mouth"></span></div>
+      <span id="result-rarity" class="rarity-chip common-chip">BIASA</span>
+      <h3 id="result-title">Natunggumi.</h3>
+      <p id="result-message">Pencet PUTAR, antu na ball na e'rannu.</p>
     </section>
 
-    <section class="collection">
+    <section class="collection-strip">
       <div class="section-heading">
-        <div><p class="eyebrow">YOUR TROPHIES</p><h2>COLLECTION</h2></div>
-        <span id="collection-count">0 / 8</span>
+        <div><p class="eyebrow">BALL-BALLTA</p><h2>KOLEKSI</h2></div>
+        <span id="collection-count">0 / 10</span>
       </div>
-      <div id="collection-list" class="collection-grid"></div>
+      <div id="collection-preview" class="collection-preview"></div>
     </section>
   </main>
 </section>
 
+<div id="book-overlay" class="drawer-overlay" aria-hidden="true">
+  <aside class="book-drawer" aria-label="Buku koleksi">
+    <div class="book-header">
+      <div><p class="eyebrow">BUKU MISTERI</p><h2>KOLEKSI BALL</h2></div>
+      <button id="close-book" class="close-book" aria-label="Tutup buku">×</button>
+    </div>
+    <div class="book-progress">
+      <div class="book-progress-head"><span>Ball na sudah nialle</span><strong id="book-count">0 / 10</strong></div>
+      <div class="progress-bar"><span id="book-progress"></span></div>
+    </div>
+    <div id="rarity-guide" class="rarity-guide"></div>
+    <div id="book-grid" class="book-grid"></div>
+  </aside>
+</div>
+
+<div id="reward-overlay" class="modal-overlay" aria-hidden="true">
+  <div class="reward-modal" role="dialog" aria-modal="true">
+    <button id="close-reward" class="close-modal" aria-label="Tutup">×</button>
+    <div class="reward-ball">+</div>
+    <p class="eyebrow">POINNU LAKBUSUKMI</p>
+    <h2>Erok tambah poin?</h2>
+    <p>Lampa ri TikTok-ku, follow akun <b>@ryoiko_</b>, terus bali' mae ri sini untuk alle bonus poin.</p>
+    <div class="reward-actions">
+      <button id="tiktok-btn" class="tiktok-btn">LAMPA RI TIKTOK</button>
+      <button id="claim-btn" class="claim-btn">LE'BA' FOLLOW • ALLE +500</button>
+    </div>
+    <p class="modal-note">Pencet di luar kotak pun bisa untuk tutup. Follow tidak bisa diverifikasi otomatis oleh website, jadi bonus diklaim secara manual.</p>
+  </div>
+</div>
 <div id="toast" class="toast"></div>
 <script src="script.js"></script>
 </body>
