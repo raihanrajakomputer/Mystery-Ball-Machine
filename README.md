@@ -28,3 +28,4 @@ Angka bonus ada di bagian atas `script.js` (`DUP_BONUS`, `DAILY_BONUS`, `MATH_RE
 ## Catatan keamanan
 Ini frontend/demo: semua data di localStorage, jawaban tebakan terlihat di source, dan claim harian
 mengikuti jam perangkat. Tidak aman untuk produksi; untuk poin sungguhan butuh validasi di server.
+@ryoiko_
