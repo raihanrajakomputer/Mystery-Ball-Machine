@@ -362,3 +362,18 @@ button{cursor:pointer}
     font-size:12px;
   }
 }
+
+
+/* ===== v2: rename account, helpers ===== */
+[hidden]{display:none!important}
+.spin-btn .spin-text{font-size:inherit}
+.book-q{position:absolute;inset:0;display:grid;place-items:center;font-family:"Archivo Black",Impact,sans-serif;font-size:28px}
+.player-name-wrap{display:flex;align-items:center;gap:8px}
+.rename-btn{border:2px solid var(--line);border-radius:999px;background:var(--paper);color:var(--brown);padding:5px 10px;font-size:11px;font-weight:700;box-shadow:2px 2px 0 var(--line);transition:.15s ease}
+.rename-btn:hover{transform:translate(-1px,-1px);background:var(--yellow)}
+#rename-input{width:100%;border:3px solid var(--line);border-radius:14px;padding:15px 16px;outline:none;background:white}
+#rename-input:focus{box-shadow:4px 4px 0 var(--yellow)}
+#rename-title{font-size:32px}
+.reward-modal>p.form-error{color:#c0392b;font-size:13px;font-weight:700;margin:10px 0 0;max-width:none}
+#rename-overlay .reward-actions{margin-top:14px}
+@media(max-width:520px){.player-name-wrap>span{display:none}}

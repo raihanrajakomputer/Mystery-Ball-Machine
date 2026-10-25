@@ -1,367 +1,571 @@
-const loginPage=document.getElementById("login-page"),gamePage=document.getElementById("game-page"),nameInput=document.getElementById("name-input"),loginBtn=document.getElementById("login-btn"),spinBtn=document.getElementById("spin-btn"),pointsEl=document.getElementById("points"),playerNameEl=document.getElementById("player-name"),resultTitle=document.getElementById("result-title"),resultMessage=document.getElementById("result-message"),resultBall=document.getElementById("result-ball"),resultRarity=document.getElementById("result-rarity"),collectionCount=document.getElementById("collection-count"),collectionPreview=document.getElementById("collection-preview"),machine=document.querySelector(".machine"),dispense=document.getElementById("dispense"),toast=document.getElementById("toast");
-const bookBtn=document.getElementById("book-btn"),bookOverlay=document.getElementById("book-overlay"),closeBook=document.getElementById("close-book"),bookGrid=document.getElementById("book-grid"),bookCount=document.getElementById("book-count"),bookProgress=document.getElementById("book-progress"),rarityGuide=document.getElementById("rarity-guide");
-const rewardOverlay=document.getElementById("reward-overlay"),closeReward=document.getElementById("close-reward"),tiktokBtn=document.getElementById("tiktok-btn"),claimBtn=document.getElementById("claim-btn");
-const COST=150,START_POINTS=1000,TIKTOK_REWARD=500,TIKTOK_URL="https://www.tiktok.com/@ryoiko_?is_from_webapp=1&sender_device=pc";
-const balls=[
-{id:"sunny-smile",rarity:"BIASA",tier:"common",title:"SENYUM MAKAMMA",message:"Ball biasa, tapi tetap senyumji. Tena masalah!",weight:33},
-{id:"orange-chill",rarity:"BIASA",tier:"common",title:"SANTAI JI",message:"Maliangko. Ball anne cuma erok bikin rileks.",weight:25},
-{id:"gold-glow",rarity:"TENA BIASA",tier:"uncommon",title:"MATA CAHAYA",message:"Sudah mulai aneh. Matanna sedikit bercahaya.",weight:18},
-{id:"crazy-smile",rarity:"TENA BIASA",tier:"uncommon",title:"SENYUM JAIL",message:"Kenapa senyum ballna begini? Tena kuisseng.",weight:11},
-{id:"shadow-face",rarity:"LANGKA",tier:"rare",title:"BALL BAYANG",message:"Warnana mulai gelap. Jangan diliat lama-lama.",weight:7},
-{id:"night-eyes",rarity:"LANGKA",tier:"rare",title:"MATA MALAM",message:"Dua matanna menyala. Ballna kayak tau sesuatu.",weight:3.8},
-{id:"red-monster",rarity:"EPIC",tier:"epic",title:"BALL GILA",message:"Mukana sudah beda. Sepertina ballna marah.",weight:1.5},
-{id:"void-smile",rarity:"EPIC",tier:"epic",title:"SENYUM KOSONG",message:"Senyumna ada, tapi matanna tidak. Seramki.",weight:.5},
-{id:"abyss",rarity:"LEGENDARI",tier:"legendary",title:"THE ABYSS",message:"Ini bukan sekadar ball. Jangan bertanya dari mana datangnya.",weight:.16},
-{id:"red-eye-god",rarity:"LEGENDARI",tier:"legendary",title:"PENUNGGU",message:"Na'issengko ini? Ballna yang cari. Bukan kita.",weight:.04}
+(() => {
+"use strict";
+
+/* =========================================================
+   CONFIG
+   ========================================================= */
+const COST = 150, START_POINTS = 1000, TIKTOK_REWARD = 500, SPIN_MS = 850;
+const TIKTOK_URL = "https://www.tiktok.com/@ryoiko_?is_from_webapp=1&sender_device=pc";
+const ADMIN_USERNAMES = ["ryels", "admin"];
+const USERNAME_RE = /^[a-z0-9][a-z0-9_. -]{1,17}$/; // wajib diawali huruf/angka (sekaligus menolak "__proto__")
+const KEYS = { users: "mysteryBallUsers", session: "mysteryBallSession", lang: "mysteryBallLanguage", legacy: "mysteryBallData" };
+const LANGS = { id: { flag: "🇮🇩", label: "Indonesia" }, mak: { flag: "🏴", label: "Makassar" } };
+const TIERS = ["common", "uncommon", "rare", "epic", "legendary"];
+const GLOBAL_VARS = { cost: COST, points: START_POINTS, bonus: TIKTOK_REWARD };
+
+/* =========================================================
+   DATA: BALLS (tiap bola punya teks per bahasa)
+   ========================================================= */
+const BALLS = [
+  { id: "sunny-smile", tier: "common", weight: 33,
+    idn: { title: "SENYUM CERIA", message: "Bola biasa, tapi tetap tersenyum. Tidak ada masalah!" },
+    mak: { title: "SENYUM MAKAMMA", message: "Ball biasa, tapi tetap senyumji. Tena masalah!" } },
+  { id: "orange-chill", tier: "common", weight: 25,
+    idn: { title: "SANTAI SAJA", message: "Santai. Bola ini cuma mau bikin kamu rileks." },
+    mak: { title: "SANTAI JI", message: "Maliangko. Ball anne cuma erok bikin rileks." } },
+  { id: "gold-glow", tier: "uncommon", weight: 18,
+    idn: { title: "MATA BERCAHAYA", message: "Sudah mulai aneh. Matanya sedikit bercahaya." },
+    mak: { title: "MATA CAHAYA", message: "Sudah mulai aneh. Matanna sedikit bercahaya." } },
+  { id: "crazy-smile", tier: "uncommon", weight: 11,
+    idn: { title: "SENYUM GILA", message: "Kenapa senyum bolanya begini? Saya juga tidak tahu." },
+    mak: { title: "SENYUM JAIL", message: "Kenapa senyum ballna begini? Tena kuisseng." } },
+  { id: "shadow-face", tier: "rare", weight: 7,
+    idn: { title: "BOLA BAYANGAN", message: "Warnanya mulai gelap. Jangan dilihat terlalu lama." },
+    mak: { title: "BALL BAYANG", message: "Warnana mulai gelap. Jangan diliat lama-lama." } },
+  { id: "night-eyes", tier: "rare", weight: 3.8,
+    idn: { title: "MATA MALAM", message: "Dua matanya menyala. Bolanya seperti tahu sesuatu." },
+    mak: { title: "MATA MALAM", message: "Dua matanna menyala. Ballna kayak tau sesuatu." } },
+  { id: "red-monster", tier: "epic", weight: 1.5,
+    idn: { title: "BOLA GILA", message: "Wajahnya sudah berubah. Sepertinya bola ini marah." },
+    mak: { title: "BALL GILA", message: "Mukana sudah beda. Sepertina ballna marah." } },
+  { id: "void-smile", tier: "epic", weight: 0.5,
+    idn: { title: "SENYUM KOSONG", message: "Senyumnya ada, tapi matanya tidak. Seram." },
+    mak: { title: "SENYUM KOSONG", message: "Senyumna ada, tapi matanna tidak. Seramki." } },
+  { id: "abyss", tier: "legendary", weight: 0.16,
+    idn: { title: "THE ABYSS", message: "Ini bukan sekadar bola. Jangan tanya dari mana asalnya." },
+    mak: { title: "THE ABYSS", message: "Ini bukan sekadar ball. Jangan bertanya dari mana datangnya." } },
+  { id: "red-eye-god", tier: "legendary", weight: 0.04,
+    idn: { title: "PENUNGGU", message: "Kamu pikir kamu yang menemukan bola ini? Justru bola ini yang mencari." },
+    mak: { title: "PENUNGGU", message: "Na'issengko ini? Ballna yang cari. Bukan kita." } }
 ];
-const rarities=[['common','BIASA'],['uncommon','TENA BIASA'],['rare','LANGKA'],['epic','EPIC'],['legendary','LEGENDARI']];
-window.mysteryBallData=balls;
+const ALL_IDS = BALLS.map(b => b.id);
+const ID_SET = new Set(ALL_IDS);
+const ballText = (b, lang) => (lang === "id" ? b.idn : b.mak);
 
-
-const ADMIN_USERNAMES=["ryels","admin"];
-const USERS_KEY="mysteryBallUsers";
-const SESSION_KEY="mysteryBallSession";
-function isAdminUsername(u){return ADMIN_USERNAMES.includes(String(u||"").trim().toLowerCase())}
-function getUsers(){return JSON.parse(localStorage.getItem(USERS_KEY))||{}}
-function saveUsers(u){localStorage.setItem(USERS_KEY,JSON.stringify(u))}
-function getData(){const u=localStorage.getItem(SESSION_KEY);if(!u)return null;return getUsers()[u]||null}
-function saveData(d){if(!d||!d.username)return;const u=getUsers();u[d.username]={...d,points:d.admin?null:d.points};saveUsers(u);localStorage.setItem(SESSION_KEY,d.username)}
-function norm(d){d.collection=d.collection||[];d.admin=!!d.admin||isAdminUsername(d.username);if(d.admin)d.points=Infinity;else if(typeof d.points!=="number")d.points=START_POINTS;if(typeof d.tiktokRewardClaimed!=="boolean")d.tiktokRewardClaimed=false;return d}
-function pointsText(p){return p===Infinity?"∞":String(p)}
-function toastMsg(t){toast.textContent=t;toast.classList.add("show");clearTimeout(toastMsg.t);toastMsg.t=setTimeout(()=>toast.classList.remove("show"),2200)}
-function confetti(){for(let i=0;i<18;i++){let e=document.createElement("span");e.className="confetti";e.style.left="50%";e.style.top="47%";e.style.background=i%2?"var(--orange)":"var(--yellow)";e.style.setProperty("--dx",`${Math.random()*420-210}px`);e.style.setProperty("--dy",`${Math.random()*300+40}px`);document.body.appendChild(e);setTimeout(()=>e.remove(),950)}}
-function enter(d){d=norm(d);saveData(d);playerNameEl.textContent=(d.admin?"★ ":"")+d.username.toUpperCase();pointsEl.textContent=pointsText(d.points);loginPage.classList.remove("active");gamePage.classList.add("active");renderCollection(d.collection)}
-function weighted(){let n=Math.random()*balls.reduce((s,b)=>s+b.weight,0);for(const b of balls){n-=b.weight;if(n<=0)return b}return balls[0]}
-function face(){return '<span class="face-eye left"></span><span class="face-eye right"></span><span class="face-mouth"></span>'}
-function setResult(b){resultBall.className=`mini-ball result-ball ${b.tier}`;resultBall.innerHTML=face();resultRarity.textContent=b.rarity;resultRarity.className=`rarity-chip ${b.tier}-chip`}
-function renderCollection(ids){collectionPreview.innerHTML="";balls.slice(0,6).forEach(b=>{let got=ids.includes(b.id),x=document.createElement("div");x.className=`collection-slot ${got?"":"locked"}`;x.innerHTML=`<div class="collection-ball ${b.tier}"></div><strong>${got?b.title:"???"}</strong><span>${got?b.rarity:"Belum nialle"}</span>`;collectionPreview.appendChild(x)});collectionCount.textContent=`${ids.length} / ${balls.length}`}
-function renderBook(ids){bookGrid.innerHTML="";balls.forEach((b,i)=>{let got=ids.includes(b.id),x=document.createElement("article");x.className=`book-card ${got?"":"locked"}`;x.innerHTML=`<div class="book-card-head"><div class="book-card-name">${got?b.title:`RAHASIA #${String(i+1).padStart(2,"0")}`}</div><div class="book-card-rarity ${b.tier}">${got?b.rarity:"???"}</div></div><div class="book-ball ${b.tier}">${got?face():"<span style='position:absolute;inset:0;display:grid;place-items:center;font-family:\"Archivo Black\",Impact,sans-serif;font-size:28px'>?</span>"}</div><div class="book-card-footer">${got?b.message:"Ballna belum nialle. Putar pole."}</div>`;bookGrid.appendChild(x)});bookCount.textContent=`${ids.length} / ${balls.length}`;bookProgress.style.width=`${ids.length/balls.length*100}%`;rarityGuide.innerHTML=rarities.map(r=>`<span class="guide ${r[0]}">${r[1]}</span>`).join("")}
-function openBook(){let d=norm(getData());renderBook(d.collection);bookOverlay.classList.add("show");document.body.classList.add("drawer-open")}
-function closeBookDrawer(){bookOverlay.classList.remove("show");document.body.classList.remove("drawer-open")}
-function openReward(){let d=norm(getData());if(d&&d.admin){toastMsg(currentLanguage==="id"?"Akun admin sudah punya poin ∞.":"Akun admin sudah punya poin ∞.");return}rewardOverlay.classList.add("show");document.body.classList.add("modal-open");if(d.tiktokRewardClaimed){claimBtn.disabled=true;claimBtn.textContent=currentLanguage==="id"?"BONUS SUDAH DIAMBIL":"BONUSNA LE'BA' NIALLE"}else{claimBtn.disabled=false;claimBtn.textContent=`${currentLanguage==="id"?"SUDAH FOLLOW":"LE'BA' FOLLOW"} • ALLE +${TIKTOK_REWARD}`}}
-function closeRewardModal(){rewardOverlay.classList.remove("show");document.body.classList.remove("modal-open")}
-loginBtn.addEventListener("click",()=>{const username=nameInput.value.trim().toLowerCase();if(!username){toastMsg(currentLanguage==="id"?"Tulis username kamu dulu.":"Tulis username ta dulu.");nameInput.focus();return}const users=getUsers();let d=users[username];if(!d){const admin=isAdminUsername(username);d={username:username,name:username,points:admin?Infinity:START_POINTS,collection:[],tiktokRewardClaimed:false,admin:admin};saveData(d);toastMsg(admin?"Akun admin aktif. Poin ∞.":t("welcome"))}else{d=norm(d);saveData(d);toastMsg(d.admin?(currentLanguage==="id"?"Selamat datang, admin. Poin ∞.":"Salamakki, admin. Poin ∞."):t("welcomeBack"))}enter(d)});
-nameInput.addEventListener("keydown",e=>{if(e.key==="Enter")loginBtn.click()});
-spinBtn.addEventListener("click",()=>{let d=getData();if(!d){toastMsg("Masukki dulu.");return}d=norm(d);if(!d.admin&&d.points<COST){openReward();return}if(!d.admin)d.points-=COST;else d.points=Infinity;saveData(d);pointsEl.textContent=pointsText(d.points);spinBtn.disabled=true;machine.classList.remove("win");machine.classList.add("spinning");dispense.textContent="●";setTimeout(()=>{let b=weighted();spinBtn.disabled=false;machine.classList.remove("spinning");machine.classList.add("win");setTimeout(()=>machine.classList.remove("win"),700);dispense.textContent="●";setResult(b);resultTitle.textContent=b.title;resultMessage.textContent=b.message;if(!d.collection.includes(b.id)){d.collection.push(b.id);toastMsg(currentLanguage==="id"?"Bola baru masuk koleksi!":"Ball baru masuk koleksita!");confetti()}else toastMsg(currentLanguage==="id"?"Bola itu sudah pernah kamu dapat.":"Ballna sudah pernah nialle.");saveData(d);renderCollection(d.collection)},850)});
-bookBtn.addEventListener("click",openBook);closeBook.addEventListener("click",closeBookDrawer);bookOverlay.addEventListener("click",e=>{if(e.target===bookOverlay)closeBookDrawer()});
-tiktokBtn.addEventListener("click",()=>{window.open(TIKTOK_URL,"_blank","noopener,noreferrer");toastMsg("Lampa ri TikTok, follow dulu!")});
-claimBtn.addEventListener("click",()=>{let d=norm(getData());if(d.admin){toastMsg("Akun admin sudah punya poin ∞.");closeRewardModal();return}if(d.tiktokRewardClaimed){toastMsg(currentLanguage==="id"?"Bonusnya sudah pernah diambil.":"Bonusna le'ba' nialle.");return}d.points+=TIKTOK_REWARD;d.tiktokRewardClaimed=true;saveData(d);pointsEl.textContent=pointsText(d.points);claimBtn.disabled=true;claimBtn.textContent=currentLanguage==="id"?"BONUS SUDAH DIAMBIL":"BONUSNA LE'BA' NIALLE";toastMsg(currentLanguage==="id"?`Berhasil! +${TIKTOK_REWARD} poin.`:`Tarima! +${TIKTOK_REWARD} poin.`);confetti();setTimeout(closeRewardModal,600)});
-closeReward.addEventListener("click",closeRewardModal);rewardOverlay.addEventListener("click",e=>{if(e.target===rewardOverlay)closeRewardModal()});document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeRewardModal();closeBookDrawer()}});
-function migrateOldPlayer(){const old=JSON.parse(localStorage.getItem("mysteryBallData")||"null");if(!old||!old.name)return;const u=old.name.trim().toLowerCase();const users=getUsers();if(!users[u]){users[u]={username:u,name:old.name,points:old.points,collection:old.collection||[],tiktokRewardClaimed:old.tiktokRewardClaimed||false,admin:isAdminUsername(u)};saveUsers(users)}}
-migrateOldPlayer();
-let saved=getData();if(saved)enter(saved);else loginPage.classList.add("active");
-
-
-
-/* =========================
-   LANGUAGE SWITCHER
-   ========================= */
-
-const mysteryLanguages = {
+/* =========================================================
+   I18N: satu-satunya sumber teks UI
+   ========================================================= */
+const I18N = {
   id: {
-    label: "Indonesia",
-    flag: "🇮🇩",
-    texts: {
-      ".eyebrow:first-of-type": "★ MYSTERY MACHINE ★",
-    },
-    static: {
-      ".login-card .tagline": "Ada sesuatu yang menunggu di dalam.",
-      ".login-card .login-question": "Siapa namamu?",
-      "#name-input": "Tulis nama kamu...",
-      "#login-btn": "MASUK KE MESIN",
-      ".login-card .tiny": "Pemain baru mendapatkan 1000 poin.",
-      ".points-badge": "POIN",
-      ".book-word": "BUKU",
-      ".intro .eyebrow": "CARI BOLA",
-      ".intro h2": "APA<br>YANG ADA?",
-      ".intro .hint": "Satu putaran = 150 poin.",
-      ".machine-label": "SATU PUTARAN • 150 POIN",
-      ".spin-btn": "PUTAR ↻",
-      ".result-label": "HASIL KAMU",
-      ".collection-strip .eyebrow": "BOLA KAMU",
-      ".collection-strip h2": "KOLEKSI",
-      ".book-header .eyebrow": "BUKU MISTERI",
-      ".book-header h2": "KOLEKSI BALL",
-      ".book-progress-head span": "Bola yang sudah didapat",
-      ".reward-modal .eyebrow": "POIN HABIS",
-      ".reward-modal h2": "Mau tambah poin?",
-      ".reward-modal > p:not(.eyebrow):not(.modal-note)": "Follow akun TikTok-ku dulu, lalu kembali ke sini untuk klaim bonus poin.",
-      "#tiktok-btn": "BUKA TIKTOK",
-      ".modal-note": "Follow tidak bisa diverifikasi otomatis oleh website, jadi bonus diklaim secara manual."
-    },
-    rarity: {
-      common: "BIASA",
-      uncommon: "TIDAK BIASA",
-      rare: "LANGKA",
-      epic: "EPIC",
-      legendary: "LEGENDARIS"
-    }
+    "login.eyebrow": "★ MESIN MISTERI ★",
+    "login.tagline": "Ada sesuatu yang menunggu di dalam.",
+    "login.question": "Siapa namamu?",
+    "login.placeholder": "Tulis username kamu...",
+    "login.button": "MASUK KE MESIN",
+    "login.tiny": "Pemain baru mendapatkan {points} poin.",
+    "login.empty": "Tulis username kamu dulu.",
+    "login.invalid": "Username 2–18 karakter, diawali huruf/angka (boleh spasi, titik, strip, underscore).",
+    "welcome.new": "Selamat datang! +{points} poin.",
+    "welcome.back": "Selamat datang kembali.",
+    "welcome.admin": "Selamat datang, admin. Poin ∞.",
+    "points": "POIN",
+    "book.word": "BUKU",
+    "book.open": "Buka buku koleksi",
+    "book.aria": "Buku koleksi",
+    "close": "Tutup",
+    "intro.eyebrow": "CARI BOLA",
+    "intro.title": "APA<br>YANG ADA?",
+    "intro.hint": "Satu putaran = {cost} poin.",
+    "machine.label": "SATU PUTARAN • {cost} POIN",
+    "spin": "PUTAR",
+    "result.label": "HASIL KAMU",
+    "result.waitingTitle": "Masih menunggu.",
+    "result.waitingMessage": "Tekan PUTAR dan cari tahu bola apa yang muncul.",
+    "collection.eyebrow": "BOLA KAMU",
+    "collection.title": "KOLEKSI",
+    "book.eyebrow": "BUKU MISTERI",
+    "book.title": "KOLEKSI BOLA",
+    "book.progress": "Bola yang sudah didapat",
+    "book.locked": "Belum didapat",
+    "book.secret": "RAHASIA",
+    "book.lockedFooter": "Bola ini belum didapat. Putar lagi.",
+    "spin.newBall": "Bola baru masuk koleksi!",
+    "spin.duplicate": "Bola itu sudah pernah kamu dapat.",
+    "reward.eyebrow": "POIN HABIS",
+    "reward.title": "Mau tambah poin?",
+    "reward.text": "Buka TikTok-ku, follow akun <b>@ryoiko_</b>, lalu kembali ke sini untuk klaim bonus poin.",
+    "reward.tiktok": "BUKA TIKTOK",
+    "reward.claim": "SUDAH FOLLOW • KLAIM +{bonus}",
+    "reward.claimed": "BONUS SUDAH DIAMBIL",
+    "reward.note": "Klik di luar kotak untuk menutup. Follow tidak bisa diverifikasi otomatis oleh website, jadi bonus diklaim secara manual.",
+    "reward.openTiktok": "Buka TikTok, follow dulu ya!",
+    "reward.success": "Berhasil! +{bonus} poin.",
+    "reward.already": "Bonusnya sudah pernah diambil.",
+    "reward.admin": "Akun admin sudah punya poin ∞.",
+    "rename.open": "GANTI",
+    "rename.eyebrow": "AKUN",
+    "rename.title": "Ganti username",
+    "rename.text": "Masukkan username baru (2–18 karakter, diawali huruf/angka; boleh spasi, titik, strip, underscore).",
+    "rename.placeholder": "Username baru...",
+    "rename.save": "SIMPAN USERNAME",
+    "rename.note": "Username khusus akan mengaktifkan mode admin: poin ∞ dan seluruh koleksi bola.",
+    "rename.empty": "Username tidak boleh kosong.",
+    "rename.same": "Itu sudah username kamu.",
+    "rename.invalid": "Username 2–18 karakter, diawali huruf/angka (boleh spasi, titik, strip, underscore).",
+    "rename.taken": "Username sudah dipakai pemain lain.",
+    "rename.done": "Username diganti menjadi {name}.",
+    "rename.adminOn": "Mode admin aktif! Poin ∞ dan semua bola terbuka.",
+    "rename.adminOff": "Mode admin dimatikan. Data asli kamu dipulihkan.",
+    "rarity.common": "BIASA", "rarity.uncommon": "TIDAK BIASA", "rarity.rare": "LANGKA",
+    "rarity.epic": "EPIC", "rarity.legendary": "LEGENDARIS"
   },
-
   mak: {
-    label: "Makassar",
-    flag: "🏴",
-    texts: {},
-    static: {
-      ".login-card .tagline": "Niak anu natunggu ri lalang.",
-      ".login-card .login-question": "Nai arenta?",
-      "#name-input": "Tulis arengta...",
-      "#login-btn": "MASUK RI MESING",
-      ".login-card .tiny": "Pemain baru tarimai 1000 poin.",
-      ".points-badge": "POIN",
-      ".book-word": "BUKU",
-      ".intro .eyebrow": "CARI BALLTA",
-      ".intro h2": "APA<br>NA ADA?",
-      ".intro .hint": "Se're putaran = 150 poin.",
-      ".machine-label": "SE'RE PUTARAN • 150 POIN",
-      ".spin-btn": "PUTAR ↻",
-      ".result-label": "HASILTA",
-      ".collection-strip .eyebrow": "BALL-BALLTA",
-      ".collection-strip h2": "KOLEKSI",
-      ".book-header .eyebrow": "BUKU MISTERI",
-      ".book-header h2": "KOLEKSI BALL",
-      ".book-progress-head span": "Ball na sudah nialle",
-      ".reward-modal .eyebrow": "POINNU HABIS",
-      ".reward-modal h2": "Erok tambah poin?",
-      ".reward-modal > p:not(.eyebrow):not(.modal-note)": "Lampa ri TikTok-ku, follow dulu, terus bali' mae ri sini untuk alle bonus poin.",
-      "#tiktok-btn": "LAMPA RI TIKTOK",
-      ".modal-note": "Follow tidak bisa dicek otomatis ri web, jadi bonusna di-claim manual."
-    },
-    rarity: {
-      common: "BIASA",
-      uncommon: "TENA BIASA",
-      rare: "LANGKA",
-      epic: "EPIC",
-      legendary: "LEGENDARI"
-    }
+    "login.eyebrow": "★ MESING MISTERI ★",
+    "login.tagline": "Salamakki battu mae!",
+    "login.question": "Nai arenta?",
+    "login.placeholder": "Tulis arengta...",
+    "login.button": "MASUK RI MESING",
+    "login.tiny": "Pemain baru tarimai {points} poin.",
+    "login.empty": "Tulis username ta dulu.",
+    "login.invalid": "Username 2–18 karakter, diawali huruf/angka (boleh spasi, titik, strip, underscore).",
+    "welcome.new": "Salamakki! +{points} poin.",
+    "welcome.back": "Salamakki battu mae.",
+    "welcome.admin": "Salamakki, admin. Poin ∞.",
+    "points": "POIN",
+    "book.word": "BUKU",
+    "book.open": "Buka buku koleksi",
+    "book.aria": "Buku koleksi",
+    "close": "Tutup",
+    "intro.eyebrow": "CINI'KI APA NA EROI",
+    "intro.title": "APA<br>NA NIALLA?",
+    "intro.hint": "Se're putaran = {cost} poin.",
+    "machine.label": "SE'RE PUTARAN • {cost} POIN",
+    "spin": "PUTAR",
+    "result.label": "HASILTA",
+    "result.waitingTitle": "Natunggumi.",
+    "result.waitingMessage": "Pencet PUTAR, antu na ball na e'rannu.",
+    "collection.eyebrow": "BALL-BALLTA",
+    "collection.title": "KOLEKSI",
+    "book.eyebrow": "BUKU MISTERI",
+    "book.title": "KOLEKSI BALL",
+    "book.progress": "Ball na sudah nialle",
+    "book.locked": "Belum nialle",
+    "book.secret": "RAHASIA",
+    "book.lockedFooter": "Ballna belum nialle. Putar pole.",
+    "spin.newBall": "Ball baru masuk koleksita!",
+    "spin.duplicate": "Ballna sudah pernah nialle.",
+    "reward.eyebrow": "POINNU LAKBUSUKMI",
+    "reward.title": "Erok tambah poin?",
+    "reward.text": "Lampa ri TikTok-ku, follow akun <b>@ryoiko_</b>, terus bali' mae ri sini untuk alle bonus poin.",
+    "reward.tiktok": "LAMPA RI TIKTOK",
+    "reward.claim": "LE'BA' FOLLOW • ALLE +{bonus}",
+    "reward.claimed": "BONUSNA LE'BA' NIALLE",
+    "reward.note": "Pencet di luar kotak pun bisa untuk tutup. Follow tidak bisa diverifikasi otomatis oleh website, jadi bonus diklaim secara manual.",
+    "reward.openTiktok": "Lampa ri TikTok, follow dulu!",
+    "reward.success": "Tarima! +{bonus} poin.",
+    "reward.already": "Bonusna le'ba' nialle.",
+    "reward.admin": "Akun admin sudah punya poin ∞.",
+    "rename.open": "GANTI",
+    "rename.eyebrow": "AKUN",
+    "rename.title": "Ganti username",
+    "rename.text": "Tulis username baru (2–18 karakter, diawali huruf/angka; boleh spasi, titik, strip, underscore).",
+    "rename.placeholder": "Username baru...",
+    "rename.save": "SIMPAN USERNAME",
+    "rename.note": "Username khusus na aktifkan mode admin: poin ∞ siagang kamma-kammanna koleksi ball.",
+    "rename.empty": "Username tena bulle kosong.",
+    "rename.same": "Iami username ta anjo.",
+    "rename.invalid": "Username 2–18 karakter, diawali huruf/angka (boleh spasi, titik, strip, underscore).",
+    "rename.taken": "Username le'ba' nipake pemain lain.",
+    "rename.done": "Username niganti jari {name}.",
+    "rename.adminOn": "Mode admin aktif! Poin ∞ siagang kamma-kammanna ball.",
+    "rename.adminOff": "Mode admin nimatei. Data asli ta nipulihkan.",
+    "rarity.common": "BIASA", "rarity.uncommon": "TENA BIASA", "rarity.rare": "LANGKA",
+    "rarity.epic": "EPIC", "rarity.legendary": "LEGENDARI"
   }
 };
 
-function mysteryCurrentLang(){
-  return localStorage.getItem("mysteryBallLanguage") || "id";
+let lang = "id";
+function t(key, vars) {
+  let s = (I18N[lang] && I18N[lang][key]) ?? I18N.id[key] ?? key;
+  const all = { ...GLOBAL_VARS, ...(vars || {}) };
+  return s.replace(/\{(\w+)\}/g, (m, k) => (k in all ? all[k] : m));
 }
 
-function mysteryText(key){
-  const lang = mysteryCurrentLang();
-  const dict = {
-    id: {
-      waitingTitle:"Masih menunggu.",
-      waitingMessage:"Tekan PUTAR dan cari tahu bola apa yang muncul.",
-      newBall:"Bola baru masuk koleksi!",
-      duplicate:"Bola itu sudah pernah kamu dapat.",
-      enterName:"Tulis namamu dulu.",
-      welcome:"Selamat datang! +1000 poin.",
-      welcomeBack:"Selamat datang kembali.",
-      loginFirst:"Masuk dulu.",
-      notEnough:"Poin kamu tidak cukup.",
-      followFirst:"Buka TikTok dan follow dulu.",
-      bonusReceived:"Berhasil! +500 poin.",
-      bonusAlready:"Bonusnya sudah pernah diambil."
-    },
-    mak: {
-      waitingTitle:"Natunggumi.",
-      waitingMessage:"Pencet PUTAR, cari ball apa na keluar.",
-      newBall:"Ball baru masuk koleksita!",
-      duplicate:"Ballna sudah pernah nialle.",
-      enterName:"Tulis arengta dulu.",
-      welcome:"Salamakki! +1000 poin.",
-      welcomeBack:"Salamakki battu mae.",
-      loginFirst:"Masukki dulu.",
-      notEnough:"Poinnu tena cukup.",
-      followFirst:"Lampa ri TikTok, follow dulu!",
-      bonusReceived:"Tarima! +500 poin.",
-      bonusAlready:"Bonusna le'ba' nialle."
-    }
-  };
-  return dict[lang][key] || dict.id[key] || key;
+function applyStaticTexts() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); }); // hanya dari kamus internal
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+  document.querySelectorAll("[data-i18n-aria]").forEach(el => { el.setAttribute("aria-label", t(el.dataset.i18nAria)); });
+  $("language-flag").textContent = LANGS[lang].flag;
+  $("language-label").textContent = LANGS[lang].label;
+  document.querySelectorAll(".language-choice").forEach(b => b.classList.toggle("active", b.dataset.language === lang));
 }
 
-function applyMysteryLanguage(){
-  const lang = mysteryCurrentLang();
-  const cfg = mysteryLanguages[lang];
+/* =========================================================
+   DOM
+   ========================================================= */
+function $(id) { return document.getElementById(id); }
+const loginPage = $("login-page"), gamePage = $("game-page"), nameInput = $("name-input"), loginBtn = $("login-btn");
+const spinBtn = $("spin-btn"), pointsEl = $("points"), playerNameEl = $("player-name");
+const resultTitle = $("result-title"), resultMessage = $("result-message"), resultBall = $("result-ball"), resultRarity = $("result-rarity");
+const collectionCount = $("collection-count"), collectionPreview = $("collection-preview");
+const machine = document.querySelector(".machine"), dispense = $("dispense"), toast = $("toast");
+const bookBtn = $("book-btn"), bookOverlay = $("book-overlay"), closeBook = $("close-book"), bookGrid = $("book-grid");
+const bookCount = $("book-count"), bookProgress = $("book-progress"), rarityGuide = $("rarity-guide");
+const rewardOverlay = $("reward-overlay"), closeReward = $("close-reward"), tiktokBtn = $("tiktok-btn"), claimBtn = $("claim-btn");
+const renameBtn = $("rename-btn"), renameOverlay = $("rename-overlay"), closeRename = $("close-rename");
+const renameInput = $("rename-input"), renameSubmit = $("rename-submit"), renameError = $("rename-error");
 
-  Object.entries(cfg.static).forEach(([selector,value])=>{
-    document.querySelectorAll(selector).forEach(el=>{
-      if(selector === ".points-badge"){
-        const strong = el.querySelector("strong");
-        if(strong){
-          el.innerHTML = "● <strong>" + strong.textContent + "</strong> " + value;
-        }
-      }else{
-        el.innerHTML = value;
-      }
-    });
-  });
-
-  const saved = JSON.parse(localStorage.getItem("mysteryBallData") || "null");
-  if(saved){
-    document.querySelectorAll("#collection-preview .collection-slot span").forEach(el=>{
-      if(el.textContent.includes("Belum") || el.textContent.includes("nialle")){
-        el.textContent = lang === "id" ? "Belum didapat" : "Belum nialle";
-      }
-    });
-  }
-
-  const resultTitle = document.getElementById("result-title");
-  const resultMessage = document.getElementById("result-message");
-
-  if(resultTitle && !resultTitle.dataset.ballId){
-    resultTitle.textContent = mysteryText("waitingTitle");
-    resultMessage.textContent = mysteryText("waitingMessage");
-  }
-
-  const currentBall = resultTitle && resultTitle.dataset.ballId;
-  if(currentBall){
-    const ball = window.mysteryBallData.find(b => b.id === currentBall);
-    if(ball){
-      resultTitle.textContent = ball.title;
-      resultMessage.textContent = ball.message[lang];
-    }
-  }
-
-  document.querySelectorAll(".book-card-rarity,.rarity-chip").forEach(el=>{
-    const tierClass = ["common","uncommon","rare","epic","legendary"].find(t=>el.classList.contains(t));
-    if(tierClass){
-      el.textContent = cfg.rarity[tierClass];
-    }
-  });
-
-  const flag = document.getElementById("language-flag");
-  const label = document.getElementById("language-label");
-  if(flag) flag.textContent = cfg.flag;
-  if(label) label.textContent = cfg.label;
-
-  document.querySelectorAll(".language-choice").forEach(btn=>{
-    btn.classList.toggle("active", btn.dataset.language === lang);
-  });
+/* =========================================================
+   STORAGE (users[username] = record asli; tampilan admin diturunkan)
+   Record: { username, points:number, collection:string[], tiktokRewardClaimed:boolean }
+   ========================================================= */
+const hasOwn = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+function readJSON(key, fallback) {
+  try { const v = JSON.parse(localStorage.getItem(key)); return v && typeof v === "object" ? v : fallback; }
+  catch { return fallback; }
 }
+function writeJSON(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch { /* storage penuh/diblok */ } }
+function getUsers() { return readJSON(KEYS.users, {}); }
+function saveUsers(u) { writeJSON(KEYS.users, u); }
+function getSession() { try { return localStorage.getItem(KEYS.session); } catch { return null; } }
+function setSession(u) { try { localStorage.setItem(KEYS.session, u); } catch { /* ignore */ } }
 
-function initMysteryLanguage(){
-  window.mysteryBallData = window.mysteryBallData || [];
+const normalizeName = s => String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
+const isAdminName = u => ADMIN_USERNAMES.includes(normalizeName(u));
 
-  const toggle = document.getElementById("language-toggle");
-  const dropdown = document.getElementById("language-dropdown");
-
-  if(!toggle || !dropdown) return;
-
-  toggle.addEventListener("click",(e)=>{
-    e.stopPropagation();
-    dropdown.classList.toggle("show");
-  });
-
-  document.querySelectorAll(".language-choice").forEach(choice=>{
-    choice.addEventListener("click",()=>{
-      localStorage.setItem("mysteryBallLanguage", choice.dataset.language);
-      dropdown.classList.remove("show");
-      applyMysteryLanguage();
-
-      const data = JSON.parse(localStorage.getItem("mysteryBallData") || "null");
-      if(data && typeof renderCollection === "function"){
-        renderCollection(data.collection || []);
-      }
-      if(data && typeof renderBook === "function" && document.getElementById("book-overlay")?.classList.contains("show")){
-        renderBook(data.collection || []);
-      }
-    });
-  });
-
-  document.addEventListener("click",()=>{
-    dropdown.classList.remove("show");
-  });
-
-  applyMysteryLanguage();
-}
-
-const originalShowToast = window.showToast;
-if(typeof originalShowToast === "function"){
-  window.showToast = function(text){
-    originalShowToast(text);
+function sanitize(username, r) {
+  r = r && typeof r === "object" ? r : {};
+  return {
+    username,
+    points: Number.isFinite(r.points) ? r.points : START_POINTS,
+    collection: [...new Set(Array.isArray(r.collection) ? r.collection : [])].filter(id => ID_SET.has(id)),
+    tiktokRewardClaimed: !!r.tiktokRewardClaimed
   };
 }
+function getRecord() {
+  const u = getSession(), users = getUsers();
+  return u && hasOwn(users, u) ? sanitize(u, users[u]) : null;
+}
+function saveRecord(rec) {
+  const users = getUsers();
+  users[rec.username] = { username: rec.username, points: rec.points, collection: rec.collection, tiktokRewardClaimed: rec.tiktokRewardClaimed };
+  saveUsers(users);
+}
+/* Tampilan efektif: admin => poin ∞ + semua koleksi (data asli tidak ditimpa) */
+function view(rec) {
+  const admin = isAdminName(rec.username);
+  return { ...rec, admin, points: admin ? Infinity : rec.points, collection: admin ? ALL_IDS.slice() : rec.collection };
+}
 
-document.addEventListener("DOMContentLoaded",()=>{
-  initMysteryLanguage();
+function migrateLegacy() {
+  const old = readJSON(KEYS.legacy, null);
+  if (!old || !old.name) return;
+  const u = normalizeName(old.name);
+  if (!u) return;
+  const users = getUsers();
+  if (!hasOwn(users, u)) { users[u] = sanitize(u, old); saveUsers(users); }
+}
+
+/* =========================================================
+   STATE UI
+   ========================================================= */
+let lastBallId = null;
+let spinning = false;
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+const face = () => '<span class="face-eye left"></span><span class="face-eye right"></span><span class="face-mouth"></span>';
+
+function renderHeader(v) {
+  playerNameEl.textContent = (v.admin ? "★ " : "") + v.username.toUpperCase();
+  pointsEl.textContent = v.admin ? "∞" : String(v.points);
+}
+function renderResult() {
+  const b = lastBallId && BALLS.find(x => x.id === lastBallId);
+  if (!b) {
+    resultBall.className = "mini-ball result-ball common";
+    resultBall.innerHTML = face();
+    resultRarity.hidden = true;
+    resultTitle.textContent = t("result.waitingTitle");
+    resultMessage.textContent = t("result.waitingMessage");
+    return;
+  }
+  const bt = ballText(b, lang);
+  resultBall.className = `mini-ball result-ball ${b.tier}`;
+  resultBall.innerHTML = face();
+  resultRarity.hidden = false;
+  resultRarity.className = `rarity-chip ${b.tier}-chip`;
+  resultRarity.textContent = t("rarity." + b.tier);
+  resultTitle.textContent = bt.title;
+  resultMessage.textContent = bt.message;
+}
+function renderCollection(v) {
+  collectionPreview.innerHTML = "";
+  BALLS.forEach(b => {
+    const got = v.collection.includes(b.id);
+    const x = document.createElement("div");
+    x.className = "collection-slot" + (got ? "" : " locked");
+    x.innerHTML = `<div class="collection-ball ${b.tier}"></div><strong></strong><span></span>`;
+    x.querySelector("strong").textContent = got ? ballText(b, lang).title : "???";
+    x.querySelector("span").textContent = got ? t("rarity." + b.tier) : t("book.locked");
+    collectionPreview.appendChild(x);
+  });
+  collectionCount.textContent = `${v.collection.length} / ${BALLS.length}`;
+}
+function renderBook(v) {
+  bookGrid.innerHTML = "";
+  BALLS.forEach((b, i) => {
+    const got = v.collection.includes(b.id), bt = ballText(b, lang);
+    const x = document.createElement("article");
+    x.className = "book-card" + (got ? "" : " locked");
+    x.innerHTML = `<div class="book-card-head"><div class="book-card-name"></div><div class="book-card-rarity ${b.tier}"></div></div>` +
+      `<div class="book-ball ${b.tier}">${got ? face() : '<span class="book-q">?</span>'}</div><div class="book-card-footer"></div>`;
+    x.querySelector(".book-card-name").textContent = got ? bt.title : `${t("book.secret")} #${String(i + 1).padStart(2, "0")}`;
+    x.querySelector(".book-card-rarity").textContent = got ? t("rarity." + b.tier) : "???";
+    x.querySelector(".book-card-footer").textContent = got ? bt.message : t("book.lockedFooter");
+    bookGrid.appendChild(x);
+  });
+  bookCount.textContent = `${v.collection.length} / ${BALLS.length}`;
+  bookProgress.style.width = `${v.collection.length / BALLS.length * 100}%`;
+  rarityGuide.innerHTML = TIERS.map(r => `<span class="guide ${r}">${t("rarity." + r)}</span>`).join("");
+}
+function renderReward() {
+  const rec = getRecord();
+  if (rec && rec.tiktokRewardClaimed) { claimBtn.disabled = true; claimBtn.textContent = t("reward.claimed"); }
+  else { claimBtn.disabled = false; claimBtn.textContent = t("reward.claim"); }
+}
+function renderAll() {
+  const rec = getRecord();
+  if (!rec) return;
+  const v = view(rec);
+  renderHeader(v);
+  renderResult();
+  renderCollection(v);
+  renderBook(v);
+  renderReward();
+}
+
+/* =========================================================
+   UI helpers
+   ========================================================= */
+function toastMsg(text) {
+  toast.textContent = text;
+  toast.classList.add("show");
+  clearTimeout(toastMsg.timer);
+  toastMsg.timer = setTimeout(() => toast.classList.remove("show"), 2400);
+}
+function confetti() {
+  for (let i = 0; i < 18; i++) {
+    const e = document.createElement("span");
+    e.className = "confetti";
+    e.style.left = "50%"; e.style.top = "47%";
+    e.style.background = i % 2 ? "var(--orange)" : "var(--yellow)";
+    e.style.setProperty("--dx", `${Math.random() * 420 - 210}px`);
+    e.style.setProperty("--dy", `${Math.random() * 300 + 40}px`);
+    document.body.appendChild(e);
+    setTimeout(() => e.remove(), 950);
+  }
+}
+function openModal(overlay) { overlay.classList.add("show"); overlay.setAttribute("aria-hidden", "false"); document.body.classList.add("modal-open"); }
+function closeModal(overlay) { overlay.classList.remove("show"); overlay.setAttribute("aria-hidden", "true"); if (!document.querySelector(".modal-overlay.show")) document.body.classList.remove("modal-open"); }
+function openBook() { const r = getRecord(); if (r) renderBook(view(r)); bookOverlay.classList.add("show"); bookOverlay.setAttribute("aria-hidden", "false"); document.body.classList.add("drawer-open"); }
+function closeBookDrawer() { bookOverlay.classList.remove("show"); bookOverlay.setAttribute("aria-hidden", "true"); document.body.classList.remove("drawer-open"); }
+function closeAllOverlays() { closeModal(rewardOverlay); closeModal(renameOverlay); closeBookDrawer(); }
+
+/* =========================================================
+   GAME LOGIC
+   ========================================================= */
+function pickBall() {
+  let n = Math.random() * BALLS.reduce((s, b) => s + b.weight, 0);
+  for (const b of BALLS) { n -= b.weight; if (n <= 0) return b; }
+  return BALLS[0];
+}
+
+function enterGame() {
+  loginPage.classList.remove("active");
+  gamePage.classList.add("active");
+  renderAll();
+}
+
+function login() {
+  const name = normalizeName(nameInput.value);
+  if (!name) { toastMsg(t("login.empty")); nameInput.focus(); return; }
+  const users = getUsers();
+  const isNew = !hasOwn(users, name);
+  if (isNew) {
+    if (!USERNAME_RE.test(name)) { toastMsg(t("login.invalid")); return; }
+    users[name] = sanitize(name, {});
+    saveUsers(users);
+  }
+  setSession(name);
+  enterGame();
+  toastMsg(isAdminName(name) ? t("welcome.admin") : t(isNew ? "welcome.new" : "welcome.back"));
+}
+
+function spin() {
+  if (spinning) return;
+  const rec = getRecord();
+  if (!rec) return;
+  const v = view(rec);
+  if (!v.admin && rec.points < COST) { openReward(); return; }
+
+  // Hasil ditentukan & DISIMPAN sekarang (atomik), animasi hanyalah tampilan.
+  const ball = pickBall();
+  const isNewBall = !v.collection.includes(ball.id);
+  if (!v.admin) rec.points -= COST;
+  if (!rec.collection.includes(ball.id)) rec.collection.push(ball.id);
+  saveRecord(rec);
+
+  spinning = true;
+  spinBtn.disabled = true;
+  pointsEl.textContent = v.admin ? "∞" : String(rec.points);
+  machine.classList.remove("win");
+  machine.classList.add("spinning");
+  dispense.textContent = "●";
+
+  setTimeout(() => {
+    machine.classList.remove("spinning");
+    machine.classList.add("win");
+    setTimeout(() => machine.classList.remove("win"), 700);
+    lastBallId = ball.id;
+    const now = getRecord();
+    if (now) { const nv = view(now); renderResult(); renderCollection(nv); renderBook(nv); }
+    toastMsg(t(isNewBall ? "spin.newBall" : "spin.duplicate"));
+    if (isNewBall) confetti();
+    spinning = false;
+    spinBtn.disabled = false;
+  }, SPIN_MS);
+}
+
+function openReward() {
+  const rec = getRecord();
+  if (rec && isAdminName(rec.username)) { toastMsg(t("reward.admin")); return; }
+  renderReward();
+  openModal(rewardOverlay);
+}
+function claimBonus() {
+  const rec = getRecord();
+  if (!rec) return;
+  if (isAdminName(rec.username)) { toastMsg(t("reward.admin")); closeModal(rewardOverlay); return; }
+  if (rec.tiktokRewardClaimed) { toastMsg(t("reward.already")); return; }
+  rec.points += TIKTOK_REWARD;
+  rec.tiktokRewardClaimed = true;
+  saveRecord(rec);
+  renderHeader(view(rec));
+  renderReward();
+  toastMsg(t("reward.success"));
+  confetti();
+  setTimeout(() => closeModal(rewardOverlay), 600);
+}
+
+/* =========================================================
+   GANTI USERNAME
+   - Nama biasa  : record dipindah ke key baru (poin & koleksi ikut).
+   - Nama admin  : poin ∞ + semua koleksi (diturunkan di view()).
+                   Jika record admin tsb sudah ada, sesi pindah ke sana
+                   (akun lama tidak dihapus, tidak ada data hilang).
+   - Admin -> biasa: data asli (poin/koleksi sebelum jadi admin) kembali.
+   ========================================================= */
+function renameCurrent(raw) {
+  const name = normalizeName(raw);
+  const cur = getSession();
+  if (!name) return { ok: false, key: "rename.empty" };
+  if (name === cur) return { ok: false, key: "rename.same" };
+  const users = getUsers();
+  const toAdmin = isAdminName(name), fromAdmin = isAdminName(cur);
+
+  if (hasOwn(users, name)) {
+    if (!toAdmin) return { ok: false, key: "rename.taken" };
+    setSession(name);                                // pindah ke akun admin yang sudah ada
+    return { ok: true, key: "rename.adminOn" };
+  }
+  if (!USERNAME_RE.test(name)) return { ok: false, key: "rename.invalid" };
+  if (!hasOwn(users, cur)) return { ok: false, key: "rename.invalid" };
+
+  const rec = sanitize(name, users[cur]);
+  delete users[cur];
+  users[name] = rec;
+  saveUsers(users);
+  setSession(name);
+  if (toAdmin) return { ok: true, key: "rename.adminOn" };
+  if (fromAdmin) return { ok: true, key: "rename.adminOff" };
+  return { ok: true, key: "rename.done", vars: { name: name.toUpperCase() } };
+}
+function openRename() {
+  renameError.hidden = true;
+  renameInput.value = getSession() || "";
+  openModal(renameOverlay);
+  setTimeout(() => { renameInput.focus(); renameInput.select(); }, 50);
+}
+function submitRename() {
+  const res = renameCurrent(renameInput.value);
+  if (!res.ok) { renameError.textContent = t(res.key); renameError.hidden = false; return; }
+  closeModal(renameOverlay);
+  renderAll();
+  toastMsg(t(res.key, res.vars));
+  if (res.key === "rename.adminOn") confetti();
+}
+
+/* =========================================================
+   EVENTS
+   ========================================================= */
+loginBtn.addEventListener("click", login);
+nameInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+spinBtn.addEventListener("click", spin);
+
+bookBtn.addEventListener("click", openBook);
+closeBook.addEventListener("click", closeBookDrawer);
+bookOverlay.addEventListener("click", e => { if (e.target === bookOverlay) closeBookDrawer(); });
+
+tiktokBtn.addEventListener("click", () => { window.open(TIKTOK_URL, "_blank", "noopener,noreferrer"); toastMsg(t("reward.openTiktok")); });
+claimBtn.addEventListener("click", claimBonus);
+closeReward.addEventListener("click", () => closeModal(rewardOverlay));
+rewardOverlay.addEventListener("click", e => { if (e.target === rewardOverlay) closeModal(rewardOverlay); });
+
+renameBtn.addEventListener("click", openRename);
+renameSubmit.addEventListener("click", submitRename);
+renameInput.addEventListener("keydown", e => { if (e.key === "Enter") submitRename(); });
+renameInput.addEventListener("input", () => { renameError.hidden = true; });
+closeRename.addEventListener("click", () => closeModal(renameOverlay));
+renameOverlay.addEventListener("click", e => { if (e.target === renameOverlay) closeModal(renameOverlay); });
+
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeAllOverlays(); });
+
+/* Bahasa */
+const langToggle = $("language-toggle"), langDropdown = $("language-dropdown");
+function setLanguage(l) {
+  if (!LANGS[l]) l = "id";
+  lang = l;
+  try { localStorage.setItem(KEYS.lang, l); } catch { /* ignore */ }
+  applyStaticTexts();
+  renderAll();
+}
+langToggle.addEventListener("click", e => {
+  e.stopPropagation();
+  const open = langDropdown.classList.toggle("show");
+  langToggle.setAttribute("aria-expanded", String(open));
 });
+document.querySelectorAll(".language-choice").forEach(btn => btn.addEventListener("click", () => {
+  setLanguage(btn.dataset.language);
+  langDropdown.classList.remove("show");
+  langToggle.setAttribute("aria-expanded", "false");
+}));
+document.addEventListener("click", () => { langDropdown.classList.remove("show"); langToggle.setAttribute("aria-expanded", "false"); });
 
-
-/* Bilingual message overrides for the existing rarity dataset */
-window.mysteryBilingualMessages = {
-  "sunny-smile": {
-    id:"Bola biasa, tapi tetap senyum. Nggak ada masalah!",
-    mak:"Ball biasa, tapi tetap senyumji. Tena masalah!"
-  },
-  "orange-chill": {
-    id:"Santai. Ball ini cuma mau bikin kamu rileks.",
-    mak:"Maliangko. Ball anne cuma erok bikin rileks."
-  },
-  "gold-glow": {
-    id:"Sudah mulai aneh. Matanya sedikit bercahaya.",
-    mak:"Sudah mulai aneh. Matanna sedikit bercahaya."
-  },
-  "crazy-smile": {
-    id:"Kenapa senyum bolanya begini? Saya juga tidak tahu.",
-    mak:"Kenapa senyum ballna begini? Tena kuisseng."
-  },
-  "shadow-face": {
-    id:"Warnanya mulai gelap. Jangan dilihat terlalu lama.",
-    mak:"Warnana mulai gelap. Jangan diliat lama-lama."
-  },
-  "night-eyes": {
-    id:"Dua matanya menyala. Bolanya seperti tahu sesuatu.",
-    mak:"Dua matanna menyala. Ballna kayak tau sesuatu."
-  },
-  "red-monster": {
-    id:"Wajahnya sudah berubah. Sepertinya bola ini marah.",
-    mak:"Mukana sudah beda. Sepertina ballna marah."
-  },
-  "void-smile": {
-    id:"Senyumnya ada, tapi matanya tidak. Seram.",
-    mak:"Senyumna ada, tapi matanna tidak. Seramki."
-  },
-  "abyss": {
-    id:"Ini bukan sekadar bola. Jangan tanya dari mana asalnya.",
-    mak:"Ini bukan sekadar ball. Jangan bertanya dari mana datangnya."
-  },
-  "red-eye-god": {
-    id:"Kamu pikir kamu yang menemukan bola ini? Justru bola ini yang mencari.",
-    mak:"Na'issengko ini? Ballna yang cari. Bukan kita."
-  }
-};
-
-
-/* Keep visible result/book messages synchronized with language */
-(function(){
-  function syncVisibleLanguage(){
-    const lang = localStorage.getItem("mysteryBallLanguage") || "id";
-    const resultTitle = document.getElementById("result-title");
-    const resultMessage = document.getElementById("result-message");
-
-    if(resultTitle && resultTitle.dataset.ballId){
-      const id = resultTitle.dataset.ballId;
-      const msg = window.mysteryBilingualMessages && window.mysteryBilingualMessages[id];
-      if(msg){
-        resultMessage.textContent = msg[lang];
-      }
-    }
-
-    document.querySelectorAll(".book-card").forEach(card=>{
-      const name = card.querySelector(".book-card-name");
-      const foot = card.querySelector(".book-card-footer");
-      if(!name || !foot) return;
-
-      const title = name.textContent.trim();
-      const ball = (window.mysteryBallData || []).find(b=>b.title === title);
-      if(ball && window.mysteryBilingualMessages[ball.id]){
-        foot.textContent = window.mysteryBilingualMessages[ball.id][lang];
-      }
-    });
-  }
-
-  const observer = new MutationObserver(syncVisibleLanguage);
-  observer.observe(document.body,{childList:true,subtree:true});
-  setInterval(syncVisibleLanguage,300);
+/* =========================================================
+   INIT
+   ========================================================= */
+(function init() {
+  let stored = null;
+  try { stored = localStorage.getItem(KEYS.lang); } catch { /* ignore */ }
+  lang = LANGS[stored] ? stored : "id";
+  applyStaticTexts();
+  migrateLegacy();
+  if (getRecord()) enterGame(); else loginPage.classList.add("active");
+  renderResult();
 })();
 
-if(document.readyState !== "loading"){
-  initMysteryLanguage();
-}
+})();

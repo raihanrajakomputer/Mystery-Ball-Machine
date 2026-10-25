@@ -9,7 +9,7 @@
 <body>
 
 <div id="language-switcher" class="language-switcher">
-  <button id="language-toggle" class="language-toggle" type="button">
+  <button id="language-toggle" class="language-toggle" type="button" aria-haspopup="true" aria-expanded="false">
     <span id="language-flag">🇮🇩</span>
     <span id="language-label">Indonesia</span>
     <span class="language-chevron">⌄</span>
@@ -26,13 +26,13 @@
 
 <section id="login-page" class="page active">
   <div class="login-card">
-    <div class="eyebrow">★ MESING MISTERI ★</div>
+    <div class="eyebrow" data-i18n="login.eyebrow">★ MESIN MISTERI ★</div>
     <h1>MYSTERY<br><span>BALL</span></h1>
-    <p class="tagline">Salamakki battu mae!</p>
-    <p class="login-question">Nai arenta?</p>
-    <input id="name-input" type="text" maxlength="18" placeholder="Tulis arengta...">
-    <button id="login-btn" class="primary-btn">MASUK RI MESING</button>
-    <p class="tiny">Pemain baru tarimai 1000 poin.</p>
+    <p class="tagline" data-i18n="login.tagline"></p>
+    <p class="login-question" data-i18n="login.question"></p>
+    <input id="name-input" type="text" maxlength="18" autocomplete="off" data-i18n-placeholder="login.placeholder">
+    <button id="login-btn" class="primary-btn" data-i18n="login.button"></button>
+    <p class="tiny" data-i18n="login.tiny"></p>
   </div>
 </section>
 
@@ -40,20 +40,23 @@
   <header class="topbar">
     <div class="brand">MYSTERY<span>BALL</span></div>
     <div class="player">
-      <span id="player-name">PAKARENA</span>
-      <div class="points-badge">● <strong id="points">1000</strong> POIN</div>
+      <div class="player-name-wrap">
+        <span id="player-name">PLAYER</span>
+        <button id="rename-btn" class="rename-btn" type="button">✎ <span data-i18n="rename.open"></span></button>
+      </div>
+      <div class="points-badge">● <strong id="points">1000</strong> <span data-i18n="points"></span></div>
     </div>
   </header>
 
-  <button id="book-btn" class="book-tab" aria-label="Buka buku koleksi">
-    <span class="book-icon">▤</span><span class="book-word">BUKU</span>
+  <button id="book-btn" class="book-tab" data-i18n-aria="book.open">
+    <span class="book-icon">▤</span><span class="book-word" data-i18n="book.word"></span>
   </button>
 
   <main class="game-layout">
     <div class="intro">
-      <p class="eyebrow">CINI'KI APA NA EROI</p>
-      <h2>APA<br>NA NIALLA?</h2>
-      <div class="hint">Se're putaran = 150 poin.</div>
+      <p class="eyebrow" data-i18n="intro.eyebrow"></p>
+      <h2 data-i18n-html="intro.title"></h2>
+      <div class="hint" data-i18n="intro.hint"></div>
     </div>
 
     <div class="machine-wrap">
@@ -70,8 +73,8 @@
           <div class="cartoon-face"><span class="eye left"></span><span class="eye right"></span><span class="mouth"></span></div>
         </div>
         <div class="machine-body">
-          <div class="machine-label">SE'RE PUTARAN • 150 POIN</div>
-          <button id="spin-btn" class="spin-btn">PUTAR <span>↻</span></button>
+          <div class="machine-label" data-i18n="machine.label"></div>
+          <button id="spin-btn" class="spin-btn"><span class="spin-text" data-i18n="spin"></span> <span>↻</span></button>
           <div class="dispense" id="dispense">?</div>
         </div>
         <div class="machine-base"></div>
@@ -79,16 +82,16 @@
     </div>
 
     <section class="result-card">
-      <span class="result-label">HASILTA</span>
+      <span class="result-label" data-i18n="result.label"></span>
       <div id="result-ball" class="mini-ball result-ball common"><span class="face-eye left"></span><span class="face-eye right"></span><span class="face-mouth"></span></div>
-      <span id="result-rarity" class="rarity-chip common-chip">BIASA</span>
-      <h3 id="result-title">Natunggumi.</h3>
-      <p id="result-message">Pencet PUTAR, antu na ball na e'rannu.</p>
+      <span id="result-rarity" class="rarity-chip common-chip" hidden></span>
+      <h3 id="result-title"></h3>
+      <p id="result-message"></p>
     </section>
 
     <section class="collection-strip">
       <div class="section-heading">
-        <div><p class="eyebrow">BALL-BALLTA</p><h2>KOLEKSI</h2></div>
+        <div><p class="eyebrow" data-i18n="collection.eyebrow"></p><h2 data-i18n="collection.title"></h2></div>
         <span id="collection-count">0 / 10</span>
       </div>
       <div id="collection-preview" class="collection-preview"></div>
@@ -97,13 +100,13 @@
 </section>
 
 <div id="book-overlay" class="drawer-overlay" aria-hidden="true">
-  <aside class="book-drawer" aria-label="Buku koleksi">
+  <aside class="book-drawer" data-i18n-aria="book.aria">
     <div class="book-header">
-      <div><p class="eyebrow">BUKU MISTERI</p><h2>KOLEKSI BALL</h2></div>
-      <button id="close-book" class="close-book" aria-label="Tutup buku">×</button>
+      <div><p class="eyebrow" data-i18n="book.eyebrow"></p><h2 data-i18n="book.title"></h2></div>
+      <button id="close-book" class="close-book" data-i18n-aria="close">×</button>
     </div>
     <div class="book-progress">
-      <div class="book-progress-head"><span>Ball na sudah nialle</span><strong id="book-count">0 / 10</strong></div>
+      <div class="book-progress-head"><span data-i18n="book.progress"></span><strong id="book-count">0 / 10</strong></div>
       <div class="progress-bar"><span id="book-progress"></span></div>
     </div>
     <div id="rarity-guide" class="rarity-guide"></div>
@@ -113,18 +116,35 @@
 
 <div id="reward-overlay" class="modal-overlay" aria-hidden="true">
   <div class="reward-modal" role="dialog" aria-modal="true">
-    <button id="close-reward" class="close-modal" aria-label="Tutup">×</button>
+    <button id="close-reward" class="close-modal" data-i18n-aria="close">×</button>
     <div class="reward-ball">+</div>
-    <p class="eyebrow">POINNU LAKBUSUKMI</p>
-    <h2>Erok tambah poin?</h2>
-    <p>Lampa ri TikTok-ku, follow akun <b>@ryoiko_</b>, terus bali' mae ri sini untuk alle bonus poin.</p>
+    <p class="eyebrow" data-i18n="reward.eyebrow"></p>
+    <h2 data-i18n="reward.title"></h2>
+    <p data-i18n-html="reward.text"></p>
     <div class="reward-actions">
-      <button id="tiktok-btn" class="tiktok-btn">LAMPA RI TIKTOK</button>
-      <button id="claim-btn" class="claim-btn">LE'BA' FOLLOW • ALLE +500</button>
+      <button id="tiktok-btn" class="tiktok-btn" data-i18n="reward.tiktok"></button>
+      <button id="claim-btn" class="claim-btn"></button>
     </div>
-    <p class="modal-note">Pencet di luar kotak pun bisa untuk tutup. Follow tidak bisa diverifikasi otomatis oleh website, jadi bonus diklaim secara manual.</p>
+    <p class="modal-note" data-i18n="reward.note"></p>
   </div>
 </div>
+
+<div id="rename-overlay" class="modal-overlay" aria-hidden="true">
+  <div class="reward-modal" role="dialog" aria-modal="true" aria-labelledby="rename-title">
+    <button id="close-rename" class="close-modal" data-i18n-aria="close">×</button>
+    <div class="reward-ball">✎</div>
+    <p class="eyebrow" data-i18n="rename.eyebrow"></p>
+    <h2 id="rename-title" data-i18n="rename.title"></h2>
+    <p data-i18n="rename.text"></p>
+    <input id="rename-input" type="text" maxlength="18" autocomplete="off" data-i18n-placeholder="rename.placeholder">
+    <p id="rename-error" class="form-error" role="alert" hidden></p>
+    <div class="reward-actions">
+      <button id="rename-submit" class="claim-btn" data-i18n="rename.save"></button>
+    </div>
+    <p class="modal-note" data-i18n="rename.note"></p>
+  </div>
+</div>
+
 <div id="toast" class="toast"></div>
 <script src="script.js"></script>
 </body>
