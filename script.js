@@ -13,7 +13,7 @@ const LANGS = { id: { flag: "🇮🇩", label: "Indonesia" }, mak: { flag: "🏴
 const TIERS = ["common", "uncommon", "rare", "epic", "legendary"];
 const DUP_BONUS = 50;                                   // bonus poin jika bola yang didapat sudah dimiliki
 const DAILY_BONUS = 200;                                // claim harian
-const MATH_REWARD = 100, MATH_DAILY_LIMIT = 5;          // teka-teki matematika: poin & batas percobaan/hari
+const MATH_REWARD = 100, MATH_DAILY_LIMIT = 20;          // teka-teki matematika: poin & batas percobaan/hari
 const GUESS_REWARD = 500, GUESS_PENALTY = 10;           // tebak nama admin (hadiah hanya sekali per akun)
 const GUESS_ANSWERS = ["rey", "rei", "rai", "raihan", "raihan al", "raihan al rajab"];
 /* Hadiah koleksi (diambil manual lewat tombol AMBIL, sekali per akun) */
